@@ -13,6 +13,7 @@ members = [
     "tools/locd-verify",
     "tools/locd-dns-tools",
     "tools/locd-compliance",
+    "locd-bench",
 ]
 
 [workspace.package]

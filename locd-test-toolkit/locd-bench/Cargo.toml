@@ -1,0 +1,35 @@
+[package]
+name = "locd-bench"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[[bench]]
+name = "crypto"
+harness = false
+
+[[bench]]
+name = "delegation"
+harness = false
+
+[[bench]]
+name = "dns"
+harness = false
+
+[[bench]]
+name = "verification"
+harness = false
+
+[dependencies]
+locd-core = { workspace = true }
+locd-crypto = { workspace = true }
+locd-delegation = { workspace = true }
+locd-dns = { workspace = true }
+locd-verification = { workspace = true }
+criterion = { version = "0.5", features = ["html_reports"] }
+tokio = { workspace = true }
+
+[dev-dependencies]
+rand = { workspace = true }
