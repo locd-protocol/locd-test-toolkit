@@ -11,6 +11,10 @@ use locd_test_vectors::TestVectorSuite;
 use std::fs;
 use std::path::PathBuf;
 
+mod edge_cases;
+mod negative;
+mod compat;
+
 #[derive(Parser)]
 #[command(name = "locd-compliance")]
 #[command(about = "Run compliance tests for the Loc'd Protocol")]
@@ -28,6 +32,34 @@ enum Commands {
         #[arg(long, value_name = "SUITE", default_value = "all")]
         suite: String,
 
+        /// Verbose output
+        #[arg(short, long)]
+        verbose: bool,
+    },
+
+    /// Run edge case tests (boundary conditions)
+    EdgeCases {
+        /// Verbose output
+        #[arg(short, long)]
+        verbose: bool,
+    },
+
+    /// Run negative tests (error handling)
+    Negative {
+        /// Verbose output
+        #[arg(short, long)]
+        verbose: bool,
+    },
+
+    /// Run compatibility tests (cross-version)
+    Compat {
+        /// Verbose output
+        #[arg(short, long)]
+        verbose: bool,
+    },
+
+    /// Run all enhanced tests (edge cases + negative + compat)
+    Enhanced {
         /// Verbose output
         #[arg(short, long)]
         verbose: bool,
@@ -65,6 +97,18 @@ fn main() -> Result<()> {
     match cli.command {
         Commands::Run { suite, verbose } => {
             run_tests(suite, verbose)?;
+        }
+        Commands::EdgeCases { verbose } => {
+            run_edge_case_tests(verbose)?;
+        }
+        Commands::Negative { verbose } => {
+            run_negative_tests(verbose)?;
+        }
+        Commands::Compat { verbose } => {
+            run_compat_tests(verbose)?;
+        }
+        Commands::Enhanced { verbose } => {
+            run_all_enhanced_tests(verbose)?;
         }
         Commands::Verify { vectors, verbose } => {
             verify_test_vectors(vectors, verbose)?;
@@ -508,6 +552,104 @@ fn show_info() -> Result<()> {
     println!("  ✓ Challenge-response verification");
     println!("  ✓ Delegation tokens");
     println!("  ✓ Revocation checking");
+
+    Ok(())
+}
+
+fn run_edge_case_tests(verbose: bool) -> Result<()> {
+    println!("🔬 Running edge case tests...\n");
+    println!("=== Edge Case Tests ===");
+
+    let (total, passed, failed) = edge_cases::run_all_edge_case_tests(verbose);
+
+    println!("\n=== Edge Case Test Summary ===");
+    println!("Total:  {}", total);
+    println!("Passed: {} ✓", passed);
+    if failed > 0 {
+        println!("Failed: {} ✗", failed);
+        std::process::exit(1);
+    } else {
+        println!("All edge case tests passed! ✓");
+    }
+
+    Ok(())
+}
+
+fn run_negative_tests(verbose: bool) -> Result<()> {
+    println!("🚫 Running negative tests...\n");
+    println!("=== Negative Tests ===");
+
+    let (total, passed, failed) = negative::run_all_negative_tests(verbose);
+
+    println!("\n=== Negative Test Summary ===");
+    println!("Total:  {}", total);
+    println!("Passed: {} ✓", passed);
+    if failed > 0 {
+        println!("Failed: {} ✗", failed);
+        std::process::exit(1);
+    } else {
+        println!("All negative tests passed! ✓");
+    }
+
+    Ok(())
+}
+
+fn run_compat_tests(verbose: bool) -> Result<()> {
+    println!("🔄 Running compatibility tests...\n");
+    println!("=== Compatibility Tests ===");
+
+    let (total, passed, failed) = compat::run_all_compat_tests(verbose);
+
+    println!("\n=== Compatibility Test Summary ===");
+    println!("Total:  {}", total);
+    println!("Passed: {} ✓", passed);
+    if failed > 0 {
+        println!("Failed: {} ✗", failed);
+        std::process::exit(1);
+    } else {
+        println!("All compatibility tests passed! ✓");
+    }
+
+    Ok(())
+}
+
+fn run_all_enhanced_tests(verbose: bool) -> Result<()> {
+    println!("🚀 Running all enhanced compliance tests...\n");
+
+    let mut total = 0;
+    let mut passed = 0;
+    let mut failed = 0;
+
+    // Run edge case tests
+    println!("=== Edge Case Tests ===");
+    let (t, p, f) = edge_cases::run_all_edge_case_tests(verbose);
+    total += t;
+    passed += p;
+    failed += f;
+
+    // Run negative tests
+    println!("\n=== Negative Tests ===");
+    let (t, p, f) = negative::run_all_negative_tests(verbose);
+    total += t;
+    passed += p;
+    failed += f;
+
+    // Run compatibility tests
+    println!("\n=== Compatibility Tests ===");
+    let (t, p, f) = compat::run_all_compat_tests(verbose);
+    total += t;
+    passed += p;
+    failed += f;
+
+    println!("\n=== Enhanced Compliance Test Summary ===");
+    println!("Total:  {}", total);
+    println!("Passed: {} ✓", passed);
+    if failed > 0 {
+        println!("Failed: {} ✗", failed);
+        std::process::exit(1);
+    } else {
+        println!("All enhanced tests passed! ✓");
+    }
 
     Ok(())
 }
