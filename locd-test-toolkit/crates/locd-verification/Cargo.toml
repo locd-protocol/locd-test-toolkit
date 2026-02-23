@@ -1,0 +1,21 @@
+[package]
+name = "locd-verification"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+locd-core = { path = "../locd-core" }
+locd-crypto = { path = "../locd-crypto" }
+locd-delegation = { path = "../locd-delegation" }
+locd-dns = { path = "../locd-dns" }
+
+ciborium = { workspace = true }
+rand = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true }
+uuid = { workspace = true }

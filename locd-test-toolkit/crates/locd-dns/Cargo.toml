@@ -1,0 +1,15 @@
+[package]
+name = "locd-dns"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+locd-core = { workspace = true }
+locd-crypto = { workspace = true }
+trust-dns-resolver = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

@@ -1,0 +1,55 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/locd-core",
+    "crates/locd-crypto",
+    "crates/locd-dns",
+    "crates/locd-delegation",
+    "crates/locd-verification",
+    "crates/locd-revocation",
+    "crates/locd-test-vectors",
+    "tools/locd-keygen",
+    "tools/locd-delegate",
+    "tools/locd-verify",
+    "tools/locd-dns-tools",
+    "tools/locd-compliance",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+authors = ["Loc'd Protocol Contributors"]
+repository = "https://github.com/locd-protocol/test-toolkit"
+
+[workspace.dependencies]
+# Core Rust crates
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+x25519-dalek = { version = "2", features = ["static_secrets"] }
+chacha20poly1305 = "0.10"
+hkdf = "0.12"
+argon2 = "0.5"
+ciborium = "0.2"
+coset = "0.3"
+trust-dns-resolver = "0.23"
+reqwest = { version = "0.11", features = ["rustls-tls"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4", "serde"] }
+clap = { version = "4", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }
+thiserror = "1"
+anyhow = "1"
+base64ct = { version = "1", features = ["alloc"] }
+hex = "0.4"
+rand = "0.8"
+sha2 = "0.10"
+
+# Workspace crates
+locd-core = { path = "crates/locd-core" }
+locd-crypto = { path = "crates/locd-crypto" }
+locd-dns = { path = "crates/locd-dns" }
+locd-delegation = { path = "crates/locd-delegation" }
+locd-verification = { path = "crates/locd-verification" }
+locd-revocation = { path = "crates/locd-revocation" }
+locd-test-vectors = { path = "crates/locd-test-vectors" }

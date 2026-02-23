@@ -1,0 +1,22 @@
+[package]
+name = "locd-test-vectors"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+# Workspace dependencies
+locd-core = { path = "../locd-core" }
+locd-crypto = { path = "../locd-crypto" }
+locd-delegation = { path = "../locd-delegation" }
+locd-dns = { path = "../locd-dns" }
+locd-verification = { path = "../locd-verification" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+hex = { workspace = true }
+rand = { workspace = true }
+
+[dev-dependencies]
