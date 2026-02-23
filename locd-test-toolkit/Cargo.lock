@@ -1459,6 +1459,7 @@ name = "locd-mock-dns"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-trait",
  "clap",
  "locd-core",
  "locd-crypto",
