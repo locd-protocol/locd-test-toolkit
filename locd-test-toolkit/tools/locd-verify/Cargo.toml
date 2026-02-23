@@ -6,4 +6,15 @@ license.workspace = true
 authors.workspace = true
 repository.workspace = true
 
+[[bin]]
+name = "locd-verify"
+path = "src/main.rs"
+
 [dependencies]
+locd-core = { workspace = true }
+locd-crypto = { workspace = true }
+locd-verification = { workspace = true }
+locd-revocation = { workspace = true }
+clap = { workspace = true }
+anyhow = { workspace = true }
+hex = { workspace = true }

@@ -6,4 +6,19 @@ license.workspace = true
 authors.workspace = true
 repository.workspace = true
 
+[[bin]]
+name = "locd-compliance"
+path = "src/main.rs"
+
 [dependencies]
+locd-core = { workspace = true }
+locd-crypto = { workspace = true }
+locd-delegation = { workspace = true }
+locd-dns = { workspace = true }
+locd-verification = { workspace = true }
+locd-revocation = { workspace = true }
+locd-test-vectors = { workspace = true }
+clap = { workspace = true }
+anyhow = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }

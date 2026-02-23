@@ -6,4 +6,14 @@ license.workspace = true
 authors.workspace = true
 repository.workspace = true
 
+[[bin]]
+name = "locd-dns-tools"
+path = "src/main.rs"
+
 [dependencies]
+locd-core = { workspace = true }
+locd-crypto = { workspace = true }
+locd-dns = { workspace = true }
+locd-revocation = { workspace = true }
+clap = { workspace = true }
+anyhow = { workspace = true }

@@ -6,4 +6,14 @@ license.workspace = true
 authors.workspace = true
 repository.workspace = true
 
+[[bin]]
+name = "locd-delegate"
+path = "src/main.rs"
+
 [dependencies]
+locd-core = { workspace = true }
+locd-crypto = { workspace = true }
+locd-delegation = { workspace = true }
+clap = { workspace = true }
+anyhow = { workspace = true }
+hex = { workspace = true }
