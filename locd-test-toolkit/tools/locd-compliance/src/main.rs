@@ -14,6 +14,7 @@ use std::path::PathBuf;
 mod edge_cases;
 mod negative;
 mod compat;
+mod report;
 
 #[derive(Parser)]
 #[command(name = "locd-compliance")]
@@ -453,19 +454,39 @@ fn verify_test_vectors(vectors_path: PathBuf, verbose: bool) -> Result<()> {
 }
 
 fn generate_report(format: String, output: Option<PathBuf>) -> Result<()> {
-    let report = match format.as_str() {
+    // Create report and run all tests
+    let mut compliance_report = report::ComplianceReport::new();
+
+    println!("Generating compliance report...\n");
+    println!("Running all test suites...\n");
+
+    // Run basic compliance tests
+    let crypto_suite = run_crypto_tests_for_report();
+    compliance_report.add_suite(crypto_suite);
+
+    let delegation_suite = run_delegation_tests_for_report();
+    compliance_report.add_suite(delegation_suite);
+
+    let dns_suite = run_dns_tests_for_report();
+    compliance_report.add_suite(dns_suite);
+
+    let verification_suite = run_verification_tests_for_report();
+    compliance_report.add_suite(verification_suite);
+
+    // Generate output in requested format
+    let content = match format.as_str() {
+        "html" => compliance_report.to_html()?,
+        "json" => serde_json::to_string_pretty(&compliance_report)?,
         "text" => generate_text_report(),
-        "json" => generate_json_report()?,
-        "html" => generate_html_report(),
         _ => anyhow::bail!("Unknown format: {}", format),
     };
 
     if let Some(output_path) = output {
-        fs::write(&output_path, &report)
+        fs::write(&output_path, &content)
             .with_context(|| format!("Failed to write report to {:?}", output_path))?;
-        println!("Report saved to: {:?}", output_path);
+        println!("✓ Report saved to: {:?}", output_path);
     } else {
-        println!("{}", report);
+        println!("{}", content);
     }
 
     Ok(())
@@ -494,47 +515,6 @@ fn generate_text_report() -> String {
     )
 }
 
-fn generate_json_report() -> Result<String> {
-    use serde_json::json;
-
-    let report = json!({
-        "protocol_version": locd_core::PROTOCOL_VERSION,
-        "report_date": chrono::Utc::now().to_rfc3339(),
-        "compliance_status": "COMPLIANT",
-        "components": {
-            "cryptography": {"status": "compliant", "features": ["ed25519", "x25519", "chacha20poly1305"]},
-            "delegation": {"status": "compliant", "features": ["cbor", "cose_sign1"]},
-            "dns": {"status": "compliant", "features": ["txt_records"]},
-            "verification": {"status": "compliant", "features": ["challenge_response"]},
-            "revocation": {"status": "compliant", "features": ["revocation_checking"]}
-        }
-    });
-
-    Ok(serde_json::to_string_pretty(&report)?)
-}
-
-fn generate_html_report() -> String {
-    format!(
-        "<!DOCTYPE html>\n\
-         <html>\n\
-         <head><title>Loc'd Protocol Compliance Report</title></head>\n\
-         <body>\n\
-         <h1>Loc'd Protocol Compliance Report</h1>\n\
-         <p>Protocol Version: {}</p>\n\
-         <p>Status: ✓ COMPLIANT</p>\n\
-         <h2>Components</h2>\n\
-         <ul>\n\
-         <li>✓ Cryptography</li>\n\
-         <li>✓ Delegation</li>\n\
-         <li>✓ DNS</li>\n\
-         <li>✓ Verification</li>\n\
-         <li>✓ Revocation</li>\n\
-         </ul>\n\
-         </body>\n\
-         </html>\n",
-        locd_core::PROTOCOL_VERSION
-    )
-}
 
 fn show_info() -> Result<()> {
     println!("Loc'd Protocol Test Toolkit");
@@ -652,4 +632,142 @@ fn run_all_enhanced_tests(verbose: bool) -> Result<()> {
     }
 
     Ok(())
+}
+
+// Helper functions for report generation
+fn run_crypto_tests_for_report() -> report::TestSuite {
+    let mut tests = Vec::new();
+
+    // Test 1: Ed25519 key generation
+    let start = std::time::Instant::now();
+    let result = test_ed25519_keygen();
+    let duration = start.elapsed();
+    tests.push(report::TestResult {
+        name: "Ed25519 key generation".to_string(),
+        status: if result.is_ok() { report::TestStatus::Pass } else { report::TestStatus::Fail },
+        duration: format!("{:.2}ms", duration.as_secs_f64() * 1000.0),
+        error: result.err().map(|e| e.to_string()),
+    });
+
+    // Test 2: Ed25519 sign/verify
+    let start = std::time::Instant::now();
+    let result = test_ed25519_sign_verify();
+    let duration = start.elapsed();
+    tests.push(report::TestResult {
+        name: "Ed25519 sign/verify".to_string(),
+        status: if result.is_ok() { report::TestStatus::Pass } else { report::TestStatus::Fail },
+        duration: format!("{:.2}ms", duration.as_secs_f64() * 1000.0),
+        error: result.err().map(|e| e.to_string()),
+    });
+
+    let passed = tests.iter().filter(|t| matches!(t.status, report::TestStatus::Pass)).count();
+    let total = tests.len();
+
+    report::TestSuite {
+        name: "Cryptography Tests".to_string(),
+        total,
+        passed,
+        failed: total - passed,
+        tests,
+    }
+}
+
+fn run_delegation_tests_for_report() -> report::TestSuite {
+    let mut tests = Vec::new();
+
+    // Test 1: Token creation
+    let start = std::time::Instant::now();
+    let result = test_delegation_creation();
+    let duration = start.elapsed();
+    tests.push(report::TestResult {
+        name: "Delegation token creation".to_string(),
+        status: if result.is_ok() { report::TestStatus::Pass } else { report::TestStatus::Fail },
+        duration: format!("{:.2}ms", duration.as_secs_f64() * 1000.0),
+        error: result.err().map(|e| e.to_string()),
+    });
+
+    // Test 2: Token signing and verification
+    let start = std::time::Instant::now();
+    let result = test_delegation_sign_verify();
+    let duration = start.elapsed();
+    tests.push(report::TestResult {
+        name: "Token signing and verification".to_string(),
+        status: if result.is_ok() { report::TestStatus::Pass } else { report::TestStatus::Fail },
+        duration: format!("{:.2}ms", duration.as_secs_f64() * 1000.0),
+        error: result.err().map(|e| e.to_string()),
+    });
+
+    let passed = tests.iter().filter(|t| matches!(t.status, report::TestStatus::Pass)).count();
+    let total = tests.len();
+
+    report::TestSuite {
+        name: "Delegation Tests".to_string(),
+        total,
+        passed,
+        failed: total - passed,
+        tests,
+    }
+}
+
+fn run_dns_tests_for_report() -> report::TestSuite {
+    let mut tests = Vec::new();
+
+    // Test 1: Identity record formatting
+    let start = std::time::Instant::now();
+    let result = test_dns_identity_record();
+    let duration = start.elapsed();
+    tests.push(report::TestResult {
+        name: "Identity record formatting".to_string(),
+        status: if result.is_ok() { report::TestStatus::Pass } else { report::TestStatus::Fail },
+        duration: format!("{:.2}ms", duration.as_secs_f64() * 1000.0),
+        error: result.err().map(|e| e.to_string()),
+    });
+
+    // Test 2: Revocation record formatting
+    let start = std::time::Instant::now();
+    let result = test_dns_revocation_record();
+    let duration = start.elapsed();
+    tests.push(report::TestResult {
+        name: "Revocation record formatting".to_string(),
+        status: if result.is_ok() { report::TestStatus::Pass } else { report::TestStatus::Fail },
+        duration: format!("{:.2}ms", duration.as_secs_f64() * 1000.0),
+        error: result.err().map(|e| e.to_string()),
+    });
+
+    let passed = tests.iter().filter(|t| matches!(t.status, report::TestStatus::Pass)).count();
+    let total = tests.len();
+
+    report::TestSuite {
+        name: "DNS Tests".to_string(),
+        total,
+        passed,
+        failed: total - passed,
+        tests,
+    }
+}
+
+fn run_verification_tests_for_report() -> report::TestSuite {
+    let mut tests = Vec::new();
+
+    // Test 1: Hello message creation
+    let start = std::time::Instant::now();
+    let result = test_verification_hello();
+    let duration = start.elapsed();
+    tests.push(report::TestResult {
+        name: "HELLO message creation".to_string(),
+        status: if result.is_ok() { report::TestStatus::Pass } else { report::TestStatus::Fail },
+        duration: format!("{:.2}ms", duration.as_secs_f64() * 1000.0),
+        error: result.err().map(|e| e.to_string()),
+    });
+
+    let passed = tests.iter().filter(|t| matches!(t.status, report::TestStatus::Pass)).count();
+    let total = tests.len();
+
+    report::TestSuite {
+        name: "Verification Tests".to_string(),
+        total,
+        passed,
+        failed: total - passed,
+        tests,
+    }
 }
