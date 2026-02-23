@@ -15,6 +15,7 @@ members = [
     "tools/locd-compliance",
     "locd-bench",
     "locd-audit",
+    "locd-mock-dns",
 ]
 exclude = [
     "locd-audit/fuzz",
