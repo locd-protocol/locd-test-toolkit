@@ -1,7 +1,10 @@
 //! DNS resolver with DNSSEC support
 
-use locd_core::{error::{Error, Result}, types::IdentityDomain};
 use crate::records::IdentityRecord;
+use locd_core::{
+    error::{Error, Result},
+    types::IdentityDomain,
+};
 
 /// Options for DNS queries
 #[derive(Debug, Clone)]
@@ -71,10 +74,7 @@ impl DnsResolver {
     ///
     /// Note: This is a placeholder implementation. Full DNS querying with
     /// trust-dns-resolver and DNSSEC validation would be implemented here.
-    pub async fn query_identity(
-        &self,
-        domain: &IdentityDomain,
-    ) -> Result<IdentityRecord> {
+    pub async fn query_identity(&self, domain: &IdentityDomain) -> Result<IdentityRecord> {
         // Placeholder: In production, this would:
         // 1. Construct DNS query for _locd.<domain> TXT record
         // 2. Perform DNS-over-HTTPS query

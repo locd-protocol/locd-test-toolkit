@@ -1,8 +1,6 @@
 //! Ed25519 signature operations (RFC 8032)
 
-use ed25519_dalek::{
-    Signature, Signer, SigningKey, Verifier, VerifyingKey,
-};
+use ed25519_dalek::{Signature, Signer, SigningKey, Verifier, VerifyingKey};
 use locd_core::{Error, Result};
 use rand::rngs::OsRng;
 
@@ -78,8 +76,8 @@ impl Ed25519PublicKey {
         let mut key_bytes = [0u8; 32];
         key_bytes.copy_from_slice(bytes);
 
-        let verifying_key = VerifyingKey::from_bytes(&key_bytes)
-            .map_err(|e| Error::InvalidKey(e.to_string()))?;
+        let verifying_key =
+            VerifyingKey::from_bytes(&key_bytes).map_err(|e| Error::InvalidKey(e.to_string()))?;
 
         Ok(Self { verifying_key })
     }

@@ -111,9 +111,7 @@ pub mod verifier;
 
 // Re-export main types
 pub use claimant::{Claimant, VerificationOutcome};
-pub use messages::{
-    ChallengeMessage, HelloMessage, ReasonCode, ResponseMessage, ResultMessage,
-};
+pub use messages::{ChallengeMessage, HelloMessage, ReasonCode, ResponseMessage, ResultMessage};
 pub use verifier::{MockRevocationChecker, RevocationChecker, Verifier};
 
 // Re-export from dependencies for convenience
@@ -130,10 +128,7 @@ mod tests {
     fn test_verification_module() {
         // This test ensures the module can be imported and basic types work
         let device_key = Ed25519KeyPair::generate();
-        let claimant = Claimant::new(
-            device_key,
-            IdentityDomain::new("test"),
-        );
+        let claimant = Claimant::new(device_key, IdentityDomain::new("test"));
 
         let hello = claimant.create_hello().unwrap();
         assert_eq!(hello.identity_domain, "test");
@@ -147,10 +142,7 @@ mod tests {
         let device_pubkey = device_key.public_key().to_bytes();
 
         // Claimant
-        let claimant = Claimant::new(
-            device_key,
-            IdentityDomain::new("alice.com"),
-        );
+        let claimant = Claimant::new(device_key, IdentityDomain::new("alice.com"));
 
         // Verifier
         let verifier = Verifier::new(

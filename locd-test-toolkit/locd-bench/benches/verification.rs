@@ -1,9 +1,9 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
-use locd_crypto::{Ed25519KeyPair, X25519KeyPair};
-use locd_delegation::{DelegationToken, current_timestamp};
-use locd_verification::{Claimant, Verifier, HelloMessage, ChallengeMessage, ResponseMessage};
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use locd_core::IdentityDomain;
+use locd_crypto::{Ed25519KeyPair, X25519KeyPair};
+use locd_delegation::{current_timestamp, DelegationToken};
 use locd_revocation::RevocationChecker;
+use locd_verification::{ChallengeMessage, Claimant, HelloMessage, ResponseMessage, Verifier};
 
 /// Mock revocation checker for benchmarking
 struct NoOpRevocationChecker;
@@ -22,9 +22,7 @@ fn bench_hello_message_create(c: &mut Criterion) {
     let claimant = Claimant::new(device_key, domain);
 
     c.bench_function("hello_message_create", |b| {
-        b.iter(|| {
-            black_box(claimant.create_hello())
-        })
+        b.iter(|| black_box(claimant.create_hello()))
     });
 }
 
@@ -41,9 +39,7 @@ fn bench_challenge_create(c: &mut Criterion) {
     let verifier = Verifier::new(service_domain, wg_key.public_key().to_bytes(), None);
 
     c.bench_function("challenge_create", |b| {
-        b.iter(|| {
-            black_box(verifier.handle_hello(&hello))
-        })
+        b.iter(|| black_box(verifier.handle_hello(&hello)))
     });
 }
 
@@ -76,9 +72,7 @@ fn bench_response_create(c: &mut Criterion) {
     let challenge = verifier.handle_hello(&hello).unwrap();
 
     c.bench_function("response_create", |b| {
-        b.iter(|| {
-            black_box(claimant.create_response(&challenge, signed_token.clone(), vec![]))
-        })
+        b.iter(|| black_box(claimant.create_response(&challenge, signed_token.clone(), vec![])))
     });
 }
 
@@ -107,10 +101,16 @@ fn bench_full_verification_flow(c: &mut Criterion) {
 
     let wg_key = X25519KeyPair::generate();
     let service_domain = IdentityDomain::new("service.example.com").unwrap();
-    let verifier = Verifier::new(service_domain, wg_key.public_key().to_bytes(), Some(Box::new(NoOpRevocationChecker)));
+    let verifier = Verifier::new(
+        service_domain,
+        wg_key.public_key().to_bytes(),
+        Some(Box::new(NoOpRevocationChecker)),
+    );
 
     let challenge = verifier.handle_hello(&hello).unwrap();
-    let response = claimant.create_response(&challenge, signed_token, vec![]).unwrap();
+    let response = claimant
+        .create_response(&challenge, signed_token, vec![])
+        .unwrap();
 
     c.bench_function("full_verification_flow", |b| {
         b.iter(|| {
@@ -119,7 +119,7 @@ fn bench_full_verification_flow(c: &mut Criterion) {
                 &challenge,
                 &response,
                 "service.example.com",
-                "read"
+                "read",
             ))
         })
     });
@@ -139,10 +139,16 @@ fn bench_verification_chain_depths(c: &mut Criterion) {
 
         let wg_key = X25519KeyPair::generate();
         let service_domain = IdentityDomain::new("service.example.com").unwrap();
-        let verifier = Verifier::new(service_domain, wg_key.public_key().to_bytes(), Some(Box::new(NoOpRevocationChecker)));
+        let verifier = Verifier::new(
+            service_domain,
+            wg_key.public_key().to_bytes(),
+            Some(Box::new(NoOpRevocationChecker)),
+        );
 
         let challenge = verifier.handle_hello(&hello).unwrap();
-        let response = claimant.create_response(&challenge, tokens[0].clone(), tokens[1..].to_vec()).unwrap();
+        let response = claimant
+            .create_response(&challenge, tokens[0].clone(), tokens[1..].to_vec())
+            .unwrap();
 
         group.bench_with_input(BenchmarkId::from_parameter(depth), depth, |b, _| {
             b.iter(|| {
@@ -151,7 +157,7 @@ fn bench_verification_chain_depths(c: &mut Criterion) {
                     &challenge,
                     &response,
                     "service.example.com",
-                    "read"
+                    "read",
                 ))
             });
         });
@@ -160,7 +166,9 @@ fn bench_verification_chain_depths(c: &mut Criterion) {
 }
 
 /// Helper: Create a verification chain with specified depth
-fn create_verification_chain(depth: usize) -> (Ed25519KeyPair, Vec<locd_delegation::SignedDelegationToken>) {
+fn create_verification_chain(
+    depth: usize,
+) -> (Ed25519KeyPair, Vec<locd_delegation::SignedDelegationToken>) {
     let mut tokens = Vec::new();
     let mut current_master = Ed25519KeyPair::generate();
 
@@ -194,17 +202,13 @@ fn bench_message_serialization(c: &mut Criterion) {
     let hello = claimant.create_hello().unwrap();
 
     c.bench_function("hello_message_serialize", |b| {
-        b.iter(|| {
-            black_box(hello.to_cbor())
-        })
+        b.iter(|| black_box(hello.to_cbor()))
     });
 
     let cbor = hello.to_cbor().unwrap();
 
     c.bench_function("hello_message_deserialize", |b| {
-        b.iter(|| {
-            black_box(HelloMessage::from_cbor(&cbor))
-        })
+        b.iter(|| black_box(HelloMessage::from_cbor(&cbor)))
     });
 }
 
@@ -224,8 +228,8 @@ fn bench_timestamp_validation(c: &mut Criterion) {
 
 /// Benchmark nonce generation and verification
 fn bench_nonce_operations(c: &mut Criterion) {
-    use rand::RngCore;
     use rand::rngs::OsRng;
+    use rand::RngCore;
 
     c.bench_function("nonce_generation", |b| {
         b.iter(|| {

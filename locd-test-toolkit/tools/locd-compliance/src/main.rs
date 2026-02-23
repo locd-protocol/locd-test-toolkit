@@ -2,8 +2,8 @@
 //!
 //! Run compliance tests, verify test vectors, and generate reports for Loc'd Protocol implementations.
 
-use clap::{Parser, Subcommand};
 use anyhow::{Context, Result};
+use clap::{Parser, Subcommand};
 use locd_crypto::Ed25519KeyPair;
 use locd_delegation::DelegationToken;
 use locd_dns::{IdentityRecord, RevocationRecord};
@@ -11,9 +11,9 @@ use locd_test_vectors::TestVectorSuite;
 use std::fs;
 use std::path::PathBuf;
 
+mod compat;
 mod edge_cases;
 mod negative;
-mod compat;
 mod report;
 
 #[derive(Parser)]
@@ -182,10 +182,14 @@ fn run_crypto_tests(verbose: bool) -> (usize, usize, usize) {
 
     // Test 1: Ed25519 key generation
     total += 1;
-    if verbose { print!("  Ed25519 key generation... "); }
+    if verbose {
+        print!("  Ed25519 key generation... ");
+    }
     match test_ed25519_keygen() {
         Ok(_) => {
-            if verbose { println!("✓"); }
+            if verbose {
+                println!("✓");
+            }
             passed += 1;
         }
         Err(e) => {
@@ -195,10 +199,14 @@ fn run_crypto_tests(verbose: bool) -> (usize, usize, usize) {
 
     // Test 2: Ed25519 sign/verify
     total += 1;
-    if verbose { print!("  Ed25519 sign/verify... "); }
+    if verbose {
+        print!("  Ed25519 sign/verify... ");
+    }
     match test_ed25519_sign_verify() {
         Ok(_) => {
-            if verbose { println!("✓"); }
+            if verbose {
+                println!("✓");
+            }
             passed += 1;
         }
         Err(e) => {
@@ -220,10 +228,14 @@ fn run_delegation_tests(verbose: bool) -> (usize, usize, usize) {
 
     // Test 1: Token creation
     total += 1;
-    if verbose { print!("  Delegation token creation... "); }
+    if verbose {
+        print!("  Delegation token creation... ");
+    }
     match test_delegation_creation() {
         Ok(_) => {
-            if verbose { println!("✓"); }
+            if verbose {
+                println!("✓");
+            }
             passed += 1;
         }
         Err(e) => {
@@ -233,10 +245,14 @@ fn run_delegation_tests(verbose: bool) -> (usize, usize, usize) {
 
     // Test 2: Token signing and verification
     total += 1;
-    if verbose { print!("  Token signing and verification... "); }
+    if verbose {
+        print!("  Token signing and verification... ");
+    }
     match test_delegation_sign_verify() {
         Ok(_) => {
-            if verbose { println!("✓"); }
+            if verbose {
+                println!("✓");
+            }
             passed += 1;
         }
         Err(e) => {
@@ -258,10 +274,14 @@ fn run_dns_tests(verbose: bool) -> (usize, usize, usize) {
 
     // Test 1: Identity record formatting
     total += 1;
-    if verbose { print!("  Identity record formatting... "); }
+    if verbose {
+        print!("  Identity record formatting... ");
+    }
     match test_dns_identity_record() {
         Ok(_) => {
-            if verbose { println!("✓"); }
+            if verbose {
+                println!("✓");
+            }
             passed += 1;
         }
         Err(e) => {
@@ -271,10 +291,14 @@ fn run_dns_tests(verbose: bool) -> (usize, usize, usize) {
 
     // Test 2: Revocation record formatting
     total += 1;
-    if verbose { print!("  Revocation record formatting... "); }
+    if verbose {
+        print!("  Revocation record formatting... ");
+    }
     match test_dns_revocation_record() {
         Ok(_) => {
-            if verbose { println!("✓"); }
+            if verbose {
+                println!("✓");
+            }
             passed += 1;
         }
         Err(e) => {
@@ -296,10 +320,14 @@ fn run_verification_tests(verbose: bool) -> (usize, usize, usize) {
 
     // Test 1: Hello message creation
     total += 1;
-    if verbose { print!("  HELLO message creation... "); }
+    if verbose {
+        print!("  HELLO message creation... ");
+    }
     match test_verification_hello() {
         Ok(_) => {
-            if verbose { println!("✓"); }
+            if verbose {
+                println!("✓");
+            }
             passed += 1;
         }
         Err(e) => {
@@ -351,7 +379,7 @@ fn test_delegation_creation() -> Result<()> {
 }
 
 fn test_delegation_sign_verify() -> Result<()> {
-    use locd_core::types::{DelegationId, ServicePattern, ActionPattern};
+    use locd_core::types::{ActionPattern, DelegationId, ServicePattern};
 
     let master = Ed25519KeyPair::generate();
     let device = Ed25519KeyPair::generate();
@@ -390,8 +418,8 @@ fn test_dns_identity_record() -> Result<()> {
 }
 
 fn test_dns_revocation_record() -> Result<()> {
-    use std::time::{SystemTime, UNIX_EPOCH};
     use locd_core::types::DelegationId;
+    use std::time::{SystemTime, UNIX_EPOCH};
 
     let ids = vec![DelegationId::new().to_string()];
     let timestamp = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
@@ -434,7 +462,10 @@ fn verify_test_vectors(vectors_path: PathBuf, verbose: bool) -> Result<()> {
     println!("  Device Keys:  {} cases", suite.keys.device_keys.len());
     println!("  Tokens:       {} cases", suite.delegation.tokens.len());
     println!("  DNS Identity: {} cases", suite.dns.identity_records.len());
-    println!("  DNS Revoke:   {} cases", suite.dns.revocation_records.len());
+    println!(
+        "  DNS Revoke:   {} cases",
+        suite.dns.revocation_records.len()
+    );
     println!("  Verify Flows: {} cases\n", suite.verification.flows.len());
 
     // Simple validation - check that we can parse the test vectors
@@ -514,7 +545,6 @@ fn generate_text_report() -> String {
         chrono::Utc::now().format("%Y-%m-%d %H:%M:%S UTC")
     )
 }
-
 
 fn show_info() -> Result<()> {
     println!("Loc'd Protocol Test Toolkit");
@@ -644,7 +674,11 @@ fn run_crypto_tests_for_report() -> report::TestSuite {
     let duration = start.elapsed();
     tests.push(report::TestResult {
         name: "Ed25519 key generation".to_string(),
-        status: if result.is_ok() { report::TestStatus::Pass } else { report::TestStatus::Fail },
+        status: if result.is_ok() {
+            report::TestStatus::Pass
+        } else {
+            report::TestStatus::Fail
+        },
         duration: format!("{:.2}ms", duration.as_secs_f64() * 1000.0),
         error: result.err().map(|e| e.to_string()),
     });
@@ -655,12 +689,19 @@ fn run_crypto_tests_for_report() -> report::TestSuite {
     let duration = start.elapsed();
     tests.push(report::TestResult {
         name: "Ed25519 sign/verify".to_string(),
-        status: if result.is_ok() { report::TestStatus::Pass } else { report::TestStatus::Fail },
+        status: if result.is_ok() {
+            report::TestStatus::Pass
+        } else {
+            report::TestStatus::Fail
+        },
         duration: format!("{:.2}ms", duration.as_secs_f64() * 1000.0),
         error: result.err().map(|e| e.to_string()),
     });
 
-    let passed = tests.iter().filter(|t| matches!(t.status, report::TestStatus::Pass)).count();
+    let passed = tests
+        .iter()
+        .filter(|t| matches!(t.status, report::TestStatus::Pass))
+        .count();
     let total = tests.len();
 
     report::TestSuite {
@@ -681,7 +722,11 @@ fn run_delegation_tests_for_report() -> report::TestSuite {
     let duration = start.elapsed();
     tests.push(report::TestResult {
         name: "Delegation token creation".to_string(),
-        status: if result.is_ok() { report::TestStatus::Pass } else { report::TestStatus::Fail },
+        status: if result.is_ok() {
+            report::TestStatus::Pass
+        } else {
+            report::TestStatus::Fail
+        },
         duration: format!("{:.2}ms", duration.as_secs_f64() * 1000.0),
         error: result.err().map(|e| e.to_string()),
     });
@@ -692,12 +737,19 @@ fn run_delegation_tests_for_report() -> report::TestSuite {
     let duration = start.elapsed();
     tests.push(report::TestResult {
         name: "Token signing and verification".to_string(),
-        status: if result.is_ok() { report::TestStatus::Pass } else { report::TestStatus::Fail },
+        status: if result.is_ok() {
+            report::TestStatus::Pass
+        } else {
+            report::TestStatus::Fail
+        },
         duration: format!("{:.2}ms", duration.as_secs_f64() * 1000.0),
         error: result.err().map(|e| e.to_string()),
     });
 
-    let passed = tests.iter().filter(|t| matches!(t.status, report::TestStatus::Pass)).count();
+    let passed = tests
+        .iter()
+        .filter(|t| matches!(t.status, report::TestStatus::Pass))
+        .count();
     let total = tests.len();
 
     report::TestSuite {
@@ -718,7 +770,11 @@ fn run_dns_tests_for_report() -> report::TestSuite {
     let duration = start.elapsed();
     tests.push(report::TestResult {
         name: "Identity record formatting".to_string(),
-        status: if result.is_ok() { report::TestStatus::Pass } else { report::TestStatus::Fail },
+        status: if result.is_ok() {
+            report::TestStatus::Pass
+        } else {
+            report::TestStatus::Fail
+        },
         duration: format!("{:.2}ms", duration.as_secs_f64() * 1000.0),
         error: result.err().map(|e| e.to_string()),
     });
@@ -729,12 +785,19 @@ fn run_dns_tests_for_report() -> report::TestSuite {
     let duration = start.elapsed();
     tests.push(report::TestResult {
         name: "Revocation record formatting".to_string(),
-        status: if result.is_ok() { report::TestStatus::Pass } else { report::TestStatus::Fail },
+        status: if result.is_ok() {
+            report::TestStatus::Pass
+        } else {
+            report::TestStatus::Fail
+        },
         duration: format!("{:.2}ms", duration.as_secs_f64() * 1000.0),
         error: result.err().map(|e| e.to_string()),
     });
 
-    let passed = tests.iter().filter(|t| matches!(t.status, report::TestStatus::Pass)).count();
+    let passed = tests
+        .iter()
+        .filter(|t| matches!(t.status, report::TestStatus::Pass))
+        .count();
     let total = tests.len();
 
     report::TestSuite {
@@ -755,12 +818,19 @@ fn run_verification_tests_for_report() -> report::TestSuite {
     let duration = start.elapsed();
     tests.push(report::TestResult {
         name: "HELLO message creation".to_string(),
-        status: if result.is_ok() { report::TestStatus::Pass } else { report::TestStatus::Fail },
+        status: if result.is_ok() {
+            report::TestStatus::Pass
+        } else {
+            report::TestStatus::Fail
+        },
         duration: format!("{:.2}ms", duration.as_secs_f64() * 1000.0),
         error: result.err().map(|e| e.to_string()),
     });
 
-    let passed = tests.iter().filter(|t| matches!(t.status, report::TestStatus::Pass)).count();
+    let passed = tests
+        .iter()
+        .filter(|t| matches!(t.status, report::TestStatus::Pass))
+        .count();
     let total = tests.len();
 
     report::TestSuite {

@@ -77,8 +77,8 @@ pub fn export_to_json_file<P: AsRef<Path>>(suite: &TestVectorSuite, path: P) -> 
     let json = serde_json::to_string_pretty(suite)
         .map_err(|e| format!("JSON serialization failed: {}", e))?;
 
-    let mut file = File::create(path.as_ref())
-        .map_err(|e| format!("Failed to create file: {}", e))?;
+    let mut file =
+        File::create(path.as_ref()).map_err(|e| format!("Failed to create file: {}", e))?;
 
     file.write_all(json.as_bytes())
         .map_err(|e| format!("Failed to write file: {}", e))?;
@@ -97,11 +97,10 @@ pub fn export_to_json_file<P: AsRef<Path>>(suite: &TestVectorSuite, path: P) -> 
 /// println!("Loaded {} Ed25519 test cases", suite.crypto.ed25519.len());
 /// ```
 pub fn import_from_json_file<P: AsRef<Path>>(path: P) -> Result<TestVectorSuite, String> {
-    let file = File::open(path.as_ref())
-        .map_err(|e| format!("Failed to open file: {}", e))?;
+    let file = File::open(path.as_ref()).map_err(|e| format!("Failed to open file: {}", e))?;
 
-    let suite: TestVectorSuite = serde_json::from_reader(file)
-        .map_err(|e| format!("JSON deserialization failed: {}", e))?;
+    let suite: TestVectorSuite =
+        serde_json::from_reader(file).map_err(|e| format!("JSON deserialization failed: {}", e))?;
 
     Ok(suite)
 }
@@ -118,8 +117,7 @@ pub fn import_from_json_file<P: AsRef<Path>>(path: P) -> Result<TestVectorSuite,
 /// assert!(json.contains("\"version\""));
 /// ```
 pub fn export_to_json_string(suite: &TestVectorSuite) -> Result<String, String> {
-    serde_json::to_string_pretty(suite)
-        .map_err(|e| format!("JSON serialization failed: {}", e))
+    serde_json::to_string_pretty(suite).map_err(|e| format!("JSON serialization failed: {}", e))
 }
 
 /// Import test vector suite from JSON string
@@ -136,8 +134,7 @@ pub fn export_to_json_string(suite: &TestVectorSuite) -> Result<String, String> 
 /// assert_eq!(suite1.version, suite2.version);
 /// ```
 pub fn import_from_json_string(json: &str) -> Result<TestVectorSuite, String> {
-    serde_json::from_str(json)
-        .map_err(|e| format!("JSON deserialization failed: {}", e))
+    serde_json::from_str(json).map_err(|e| format!("JSON deserialization failed: {}", e))
 }
 
 #[cfg(test)]
@@ -211,23 +208,50 @@ mod tests {
         let suite = generate_suite();
 
         // Crypto vectors
-        assert!(suite.crypto.ed25519.len() >= 2, "Should have at least 2 Ed25519 test cases");
-        assert!(suite.crypto.base64url.len() >= 3, "Should have at least 3 Base64url test cases");
+        assert!(
+            suite.crypto.ed25519.len() >= 2,
+            "Should have at least 2 Ed25519 test cases"
+        );
+        assert!(
+            suite.crypto.base64url.len() >= 3,
+            "Should have at least 3 Base64url test cases"
+        );
 
         // Key vectors
-        assert!(suite.keys.master_keys.len() >= 2, "Should have at least 2 master key cases");
-        assert!(suite.keys.device_keys.len() >= 2, "Should have at least 2 device key cases");
-        assert!(suite.keys.session_keys.len() >= 1, "Should have at least 1 session key case");
+        assert!(
+            suite.keys.master_keys.len() >= 2,
+            "Should have at least 2 master key cases"
+        );
+        assert!(
+            suite.keys.device_keys.len() >= 2,
+            "Should have at least 2 device key cases"
+        );
+        assert!(
+            suite.keys.session_keys.len() >= 1,
+            "Should have at least 1 session key case"
+        );
 
         // Delegation vectors
-        assert!(suite.delegation.tokens.len() >= 1, "Should have at least 1 delegation token case");
+        assert!(
+            suite.delegation.tokens.len() >= 1,
+            "Should have at least 1 delegation token case"
+        );
 
         // DNS vectors
-        assert!(suite.dns.identity_records.len() >= 2, "Should have at least 2 identity record cases");
-        assert!(suite.dns.revocation_records.len() >= 2, "Should have at least 2 revocation record cases");
+        assert!(
+            suite.dns.identity_records.len() >= 2,
+            "Should have at least 2 identity record cases"
+        );
+        assert!(
+            suite.dns.revocation_records.len() >= 2,
+            "Should have at least 2 revocation record cases"
+        );
 
         // Verification vectors
-        assert!(suite.verification.flows.len() >= 1, "Should have at least 1 verification flow");
+        assert!(
+            suite.verification.flows.len() >= 1,
+            "Should have at least 1 verification flow"
+        );
         assert!(suite.verification.messages.hello_messages.len() >= 1);
         assert!(suite.verification.messages.challenge_messages.len() >= 1);
         assert!(suite.verification.messages.result_messages.len() >= 2);

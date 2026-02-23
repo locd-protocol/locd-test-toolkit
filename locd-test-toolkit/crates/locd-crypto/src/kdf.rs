@@ -34,8 +34,8 @@ pub fn derive_encryption_key(shared_secret: &[u8], context: &[u8]) -> Result<Vec
     hkdf_sha256(
         shared_secret,
         b"locd-encryption-v1", // salt
-        context,              // info
-        32,                   // ChaCha20-Poly1305 key size
+        context,               // info
+        32,                    // ChaCha20-Poly1305 key size
     )
 }
 

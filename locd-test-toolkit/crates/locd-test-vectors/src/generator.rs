@@ -49,9 +49,9 @@ fn generate_crypto_vectors() -> CryptoVectors {
                 should_verify: true,
             },
         ],
-        x25519: vec![],     // X25519 test cases would go here
+        x25519: vec![],            // X25519 test cases would go here
         chacha20_poly1305: vec![], // AEAD test cases
-        hkdf: vec![],       // HKDF test cases
+        hkdf: vec![],              // HKDF test cases
         base64url: vec![
             Base64UrlTestCase {
                 description: "Empty string".to_string(),
@@ -65,14 +65,16 @@ fn generate_crypto_vectors() -> CryptoVectors {
             },
             Base64UrlTestCase {
                 description: "32 random bytes".to_string(),
-                input: hex::encode([0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0,
-                                   0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
-                                   0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x00,
-                                   0xa1, 0xb2, 0xc3, 0xd4, 0xe5, 0xf6, 0x07, 0x18]),
-                output: base64url_encode(&[0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0,
-                                          0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
-                                          0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x00,
-                                          0xa1, 0xb2, 0xc3, 0xd4, 0xe5, 0xf6, 0x07, 0x18]),
+                input: hex::encode([
+                    0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0, 0x11, 0x22, 0x33, 0x44, 0x55,
+                    0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x00, 0xa1, 0xb2,
+                    0xc3, 0xd4, 0xe5, 0xf6, 0x07, 0x18,
+                ]),
+                output: base64url_encode(&[
+                    0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0, 0x11, 0x22, 0x33, 0x44, 0x55,
+                    0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x00, 0xa1, 0xb2,
+                    0xc3, 0xd4, 0xe5, 0xf6, 0x07, 0x18,
+                ]),
             },
         ],
     }
@@ -119,16 +121,14 @@ fn generate_key_vectors() -> KeyVectors {
                 is_expired: true,
             },
         ],
-        session_keys: vec![
-            KeyTestCase {
-                description: "Session key with seed [20; 32]".to_string(),
-                seed: hex::encode([20u8; 32]),
-                public_key: hex::encode(keypair_from_seed([20u8; 32]).public_key().to_bytes()),
-                created_at: now,
-                expires_at: Some(now + 3600), // 1 hour
-                is_expired: false,
-            },
-        ],
+        session_keys: vec![KeyTestCase {
+            description: "Session key with seed [20; 32]".to_string(),
+            seed: hex::encode([20u8; 32]),
+            public_key: hex::encode(keypair_from_seed([20u8; 32]).public_key().to_bytes()),
+            created_at: now,
+            expires_at: Some(now + 3600), // 1 hour
+            is_expired: false,
+        }],
     }
 }
 
@@ -156,24 +156,22 @@ fn generate_delegation_vectors() -> DelegationVectors {
     let signed = token.sign(&master_key).expect("Failed to sign token");
 
     DelegationVectors {
-        tokens: vec![
-            DelegationTestCase {
-                description: "Valid delegation token for api.example.com".to_string(),
-                master_key_seed: hex::encode([1u8; 32]),
-                master_key_public: hex::encode(master_key.public_key().to_bytes()),
-                device_key_seed: hex::encode([10u8; 32]),
-                device_key_public: hex::encode(device_key.public_key().to_bytes()),
-                delegation_id: delegation_id.to_string(),
-                created_at: now,
-                expires_at: now + 86400,
-                services: vec!["api.example.com".to_string()],
-                actions: vec!["read".to_string()],
-                max_uses: None,
-                token_cbor: hex::encode(&signed),
-                signature: "".to_string(), // Would need to extract from CBOR
-                should_verify: true,
-            },
-        ],
+        tokens: vec![DelegationTestCase {
+            description: "Valid delegation token for api.example.com".to_string(),
+            master_key_seed: hex::encode([1u8; 32]),
+            master_key_public: hex::encode(master_key.public_key().to_bytes()),
+            device_key_seed: hex::encode([10u8; 32]),
+            device_key_public: hex::encode(device_key.public_key().to_bytes()),
+            delegation_id: delegation_id.to_string(),
+            created_at: now,
+            expires_at: now + 86400,
+            services: vec!["api.example.com".to_string()],
+            actions: vec!["read".to_string()],
+            max_uses: None,
+            token_cbor: hex::encode(&signed),
+            signature: "".to_string(), // Would need to extract from CBOR
+            should_verify: true,
+        }],
     }
 }
 
@@ -241,42 +239,36 @@ fn generate_verification_vectors() -> VerificationVectors {
     rng.fill_bytes(&mut nonce);
 
     VerificationVectors {
-        flows: vec![
-            VerificationFlowTestCase {
-                description: "Successful verification flow".to_string(),
-                claimant_domain: "alice.example.com".to_string(),
-                claimant_device_key_seed: hex::encode([10u8; 32]),
-                claimant_device_key_public: hex::encode(device_key.public_key().to_bytes()),
-                verifier_domain: "service.example.com".to_string(),
-                verifier_wg_public_key: hex::encode([99u8; 32]),
-                challenge_nonce: hex::encode(nonce),
-                challenge_timestamp: now,
-                delegation_id: DelegationId::new().to_string(),
-                response_signature: hex::encode([0u8; 64]), // Placeholder
-                expected_result: true,
-                expected_reason: "Success".to_string(),
-            },
-        ],
+        flows: vec![VerificationFlowTestCase {
+            description: "Successful verification flow".to_string(),
+            claimant_domain: "alice.example.com".to_string(),
+            claimant_device_key_seed: hex::encode([10u8; 32]),
+            claimant_device_key_public: hex::encode(device_key.public_key().to_bytes()),
+            verifier_domain: "service.example.com".to_string(),
+            verifier_wg_public_key: hex::encode([99u8; 32]),
+            challenge_nonce: hex::encode(nonce),
+            challenge_timestamp: now,
+            delegation_id: DelegationId::new().to_string(),
+            response_signature: hex::encode([0u8; 64]), // Placeholder
+            expected_result: true,
+            expected_reason: "Success".to_string(),
+        }],
         messages: MessageVectors {
-            hello_messages: vec![
-                HelloMessageTestCase {
-                    description: "HELLO message from alice.example.com".to_string(),
-                    identity_domain: "alice.example.com".to_string(),
-                    device_public_key: hex::encode(device_key.public_key().to_bytes()),
-                    cbor_encoded: hex::encode(vec![0xa2, 0x01]), // Placeholder CBOR
-                    should_parse: true,
-                },
-            ],
-            challenge_messages: vec![
-                ChallengeMessageTestCase {
-                    description: "CHALLENGE with 32-byte nonce".to_string(),
-                    nonce: hex::encode(nonce),
-                    timestamp: now,
-                    verifier_domain: "service.example.com".to_string(),
-                    cbor_encoded: hex::encode(vec![0xa3, 0x01]), // Placeholder CBOR
-                    should_parse: true,
-                },
-            ],
+            hello_messages: vec![HelloMessageTestCase {
+                description: "HELLO message from alice.example.com".to_string(),
+                identity_domain: "alice.example.com".to_string(),
+                device_public_key: hex::encode(device_key.public_key().to_bytes()),
+                cbor_encoded: hex::encode(vec![0xa2, 0x01]), // Placeholder CBOR
+                should_parse: true,
+            }],
+            challenge_messages: vec![ChallengeMessageTestCase {
+                description: "CHALLENGE with 32-byte nonce".to_string(),
+                nonce: hex::encode(nonce),
+                timestamp: now,
+                verifier_domain: "service.example.com".to_string(),
+                cbor_encoded: hex::encode(vec![0xa3, 0x01]), // Placeholder CBOR
+                should_parse: true,
+            }],
             response_messages: vec![],
             result_messages: vec![
                 ResultMessageTestCase {

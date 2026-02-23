@@ -1,8 +1,8 @@
-use clap::{Parser, Subcommand};
 use anyhow::Result;
-use locd_mock_dns::MockDnsServer;
-use locd_dns::{IdentityRecord, RevocationRecord};
+use clap::{Parser, Subcommand};
 use locd_crypto::Ed25519KeyPair;
+use locd_dns::{IdentityRecord, RevocationRecord};
+use locd_mock_dns::MockDnsServer;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Parser)]
@@ -45,11 +45,10 @@ async fn main() -> Result<()> {
 
                 // Add sample identity record
                 let keypair = Ed25519KeyPair::generate();
-                let timestamp = SystemTime::now()
-                    .duration_since(UNIX_EPOCH)?
-                    .as_secs();
+                let timestamp = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
 
-                let identity_record = IdentityRecord::new(&keypair.public_key().to_bytes(), timestamp);
+                let identity_record =
+                    IdentityRecord::new(&keypair.public_key().to_bytes(), timestamp);
                 server.add_identity_record("example.com", identity_record);
                 println!("  ✓ Added identity record for _locd.example.com");
 
@@ -60,7 +59,10 @@ async fn main() -> Result<()> {
                 server.add_revocation_record("example.com", revocation_record);
                 println!("  ✓ Added revocation record for _locd-revoke.example.com");
 
-                println!("\n💡 Test with: dig @127.0.0.1 -p {} _locd.example.com TXT\n", port);
+                println!(
+                    "\n💡 Test with: dig @127.0.0.1 -p {} _locd.example.com TXT\n",
+                    port
+                );
             }
 
             server.start().await?;
@@ -92,14 +94,16 @@ fn show_examples() {
     println!("   dig @127.0.0.1 -p 5353 _locd-revoke.example.com TXT\n");
 
     println!("5️⃣  Using with Rust:");
-    println!(r#"
+    println!(
+        r#"
    use locd_mock_dns::MockDnsServer;
    use locd_dns::IdentityRecord;
 
    let mut server = MockDnsServer::new(5353);
    server.add_identity_record("test.com", record);
    server.start().await?;
-"#);
+"#
+    );
 
     println!("\n📚 For more information:");
     println!("   https://github.com/locd-protocol/locd-test-toolkit\n");

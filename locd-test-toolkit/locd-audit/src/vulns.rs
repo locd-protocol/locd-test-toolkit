@@ -123,8 +123,14 @@ mod tests {
         assert_eq!(reports.len(), 5, "Should have 5 vulnerability checks");
 
         // Verify at least one mitigation exists
-        let mitigated = reports.iter().filter(|r| matches!(r.status, Status::Mitigated)).count();
-        assert!(mitigated > 0, "Should have at least one mitigated vulnerability");
+        let mitigated = reports
+            .iter()
+            .filter(|r| matches!(r.status, Status::Mitigated))
+            .count();
+        assert!(
+            mitigated > 0,
+            "Should have at least one mitigated vulnerability"
+        );
     }
 
     #[test]

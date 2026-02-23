@@ -1,7 +1,7 @@
 //! Timing attack detection via statistical analysis
 
-use std::time::{Duration, Instant};
 use statistical::standard_deviation;
+use std::time::{Duration, Instant};
 
 pub struct TimingAnalysis {
     pub samples: Vec<Duration>,
@@ -11,11 +11,7 @@ pub struct TimingAnalysis {
     pub suspicious: bool,
 }
 
-pub fn detect_timing_leaks<F>(
-    operation: F,
-    samples: usize,
-    threshold: f64,
-) -> TimingAnalysis
+pub fn detect_timing_leaks<F>(operation: F, samples: usize, threshold: f64) -> TimingAnalysis
 where
     F: Fn() -> (),
 {
@@ -29,10 +25,7 @@ where
     }
 
     // Convert to microseconds for analysis
-    let us_values: Vec<f64> = durations
-        .iter()
-        .map(|d| d.as_micros() as f64)
-        .collect();
+    let us_values: Vec<f64> = durations.iter().map(|d| d.as_micros() as f64).collect();
 
     let mean_us = us_values.iter().sum::<f64>() / us_values.len() as f64;
     let stddev = standard_deviation(&us_values, None);
@@ -62,7 +55,10 @@ mod tests {
             5.0, // 5% threshold
         );
 
-        println!("Mean: {:?}, Variance: {:.2}%", analysis.mean, analysis.max_variance);
+        println!(
+            "Mean: {:?}, Variance: {:.2}%",
+            analysis.mean, analysis.max_variance
+        );
         // Note: This may occasionally be suspicious due to system noise
     }
 
@@ -82,9 +78,15 @@ mod tests {
             5.0,
         );
 
-        println!("Mean: {:?}, Variance: {:.2}%", analysis.mean, analysis.max_variance);
+        println!(
+            "Mean: {:?}, Variance: {:.2}%",
+            analysis.mean, analysis.max_variance
+        );
         // High variance from sleep should be detected
-        assert!(analysis.suspicious || analysis.max_variance > 1.0,
-            "Should detect timing variance, got {:.2}%", analysis.max_variance);
+        assert!(
+            analysis.suspicious || analysis.max_variance > 1.0,
+            "Should detect timing variance, got {:.2}%",
+            analysis.max_variance
+        );
     }
 }

@@ -40,7 +40,9 @@ impl ComplianceReport {
     pub fn new() -> Self {
         Self {
             protocol_version: locd_core::PROTOCOL_VERSION.to_string(),
-            report_date: chrono::Utc::now().format("%Y-%m-%d %H:%M:%S UTC").to_string(),
+            report_date: chrono::Utc::now()
+                .format("%Y-%m-%d %H:%M:%S UTC")
+                .to_string(),
             total_tests: 0,
             passed: 0,
             failed: 0,

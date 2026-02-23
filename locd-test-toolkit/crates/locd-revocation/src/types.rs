@@ -46,7 +46,10 @@ pub struct RevocationList {
 
 impl RevocationList {
     /// Verify the signature on this revocation list
-    pub fn verify_signature(&self, public_key: &locd_crypto::Ed25519PublicKey) -> locd_core::Result<()> {
+    pub fn verify_signature(
+        &self,
+        public_key: &locd_crypto::Ed25519PublicKey,
+    ) -> locd_core::Result<()> {
         // Create canonical JSON without signature field
         let canonical = serde_json::json!({
             "v": &self.v,
@@ -126,13 +129,11 @@ mod tests {
         let list = RevocationList {
             v: "locd-revoke-list-v1".to_string(),
             identity: "example.com".to_string(),
-            revocations: vec![
-                RevocationEntry {
-                    delegation_id: "550e8400-e29b-41d4-a716-446655440000".to_string(),
-                    revoked_at: 1739577600,
-                    reason: RevocationReason::DeviceLost,
-                },
-            ],
+            revocations: vec![RevocationEntry {
+                delegation_id: "550e8400-e29b-41d4-a716-446655440000".to_string(),
+                revoked_at: 1739577600,
+                reason: RevocationReason::DeviceLost,
+            }],
             published_at: 1739577660,
             signature: "dGVzdC1zaWduYXR1cmU".to_string(),
         };

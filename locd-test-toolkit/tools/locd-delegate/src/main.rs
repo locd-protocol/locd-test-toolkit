@@ -2,11 +2,11 @@
 //!
 //! Create, sign, verify, and inspect delegation tokens for the Loc'd Protocol.
 
-use clap::{Parser, Subcommand};
 use anyhow::{Context, Result};
+use clap::{Parser, Subcommand};
 use locd_core::types::{ActionPattern, DelegationId, ServicePattern};
 use locd_crypto::{Ed25519KeyPair, Ed25519PublicKey};
-use locd_delegation::{DelegationToken, current_timestamp};
+use locd_delegation::{current_timestamp, DelegationToken};
 use std::fs;
 use std::path::PathBuf;
 
@@ -172,10 +172,20 @@ fn create_delegation(
     eprintln!("✓ Delegation token created and signed");
     eprintln!("  Output: {:?}", output);
     eprintln!("  Delegation ID: {}", token.delegation_id);
-    eprintln!("  Expires in: {} seconds", token.expires_at - token.issued_at);
+    eprintln!(
+        "  Expires in: {} seconds",
+        token.expires_at - token.issued_at
+    );
     eprintln!("  Services: {}", token.services.len());
     eprintln!("  Actions: {}", token.actions.len());
-    eprintln!("  Max uses: {}", if token.max_uses == 0 { "unlimited".to_string() } else { token.max_uses.to_string() });
+    eprintln!(
+        "  Max uses: {}",
+        if token.max_uses == 0 {
+            "unlimited".to_string()
+        } else {
+            token.max_uses.to_string()
+        }
+    );
 
     Ok(())
 }
@@ -207,21 +217,47 @@ fn verify_delegation(token_file: PathBuf, master_key_path: PathBuf) -> Result<()
     if now > token.expires_at {
         eprintln!("  Status: ⚠️  EXPIRED");
     } else {
-        eprintln!("  Status: ✓ VALID (expires in {} seconds)", token.expires_at - now);
+        eprintln!(
+            "  Status: ✓ VALID (expires in {} seconds)",
+            token.expires_at - now
+        );
     }
 
     eprintln!("\nConstraints:");
-    eprintln!("  Services: {}", if token.services.is_empty() {
-        "any".to_string()
-    } else {
-        token.services.iter().map(|s| s.as_str()).collect::<Vec<_>>().join(", ")
-    });
-    eprintln!("  Actions: {}", if token.actions.is_empty() {
-        "any".to_string()
-    } else {
-        token.actions.iter().map(|a| a.as_str()).collect::<Vec<_>>().join(", ")
-    });
-    eprintln!("  Max uses: {}", if token.max_uses == 0 { "unlimited".to_string() } else { token.max_uses.to_string() });
+    eprintln!(
+        "  Services: {}",
+        if token.services.is_empty() {
+            "any".to_string()
+        } else {
+            token
+                .services
+                .iter()
+                .map(|s| s.as_str())
+                .collect::<Vec<_>>()
+                .join(", ")
+        }
+    );
+    eprintln!(
+        "  Actions: {}",
+        if token.actions.is_empty() {
+            "any".to_string()
+        } else {
+            token
+                .actions
+                .iter()
+                .map(|a| a.as_str())
+                .collect::<Vec<_>>()
+                .join(", ")
+        }
+    );
+    eprintln!(
+        "  Max uses: {}",
+        if token.max_uses == 0 {
+            "unlimited".to_string()
+        } else {
+            token.max_uses.to_string()
+        }
+    );
     eprintln!("  Can sub-delegate: {}", token.can_sub_delegate);
 
     Ok(())
@@ -262,7 +298,10 @@ fn show_delegation_info(token_file: PathBuf, master_key_path: Option<PathBuf>) -
     if now > token.expires_at {
         println!("Status: EXPIRED ({} seconds ago)", now - token.expires_at);
     } else {
-        println!("Status: VALID (expires in {} seconds)", token.expires_at - now);
+        println!(
+            "Status: VALID (expires in {} seconds)",
+            token.expires_at - now
+        );
     }
 
     println!("\n=== Constraints ===");
@@ -284,11 +323,14 @@ fn show_delegation_info(token_file: PathBuf, master_key_path: Option<PathBuf>) -
         }
     }
 
-    println!("Max uses: {}", if token.max_uses == 0 {
-        "unlimited".to_string()
-    } else {
-        token.max_uses.to_string()
-    });
+    println!(
+        "Max uses: {}",
+        if token.max_uses == 0 {
+            "unlimited".to_string()
+        } else {
+            token.max_uses.to_string()
+        }
+    );
     println!("Can create sub-delegations: {}", token.can_sub_delegate);
 
     Ok(())

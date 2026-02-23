@@ -8,21 +8,21 @@
 //! - HKDF-SHA256 key derivation
 //! - Argon2id password hashing
 
-pub mod ed25519;
-pub mod x25519;
 pub mod aead;
+pub mod ed25519;
+pub mod encoding;
 pub mod kdf;
 pub mod password;
-pub mod encoding;
+pub mod x25519;
 
 // Re-export commonly used items
-pub use ed25519::{Ed25519KeyPair, Ed25519PublicKey, Ed25519Signature};
-pub use x25519::{X25519KeyPair, X25519PublicKey, X25519SecretKey};
 pub use aead::{ChaCha20Poly1305, XChaCha20Poly1305};
+pub use ed25519::{Ed25519KeyPair, Ed25519PublicKey, Ed25519Signature};
+pub use encoding::{base64url_decode, base64url_encode};
 pub use kdf::hkdf_sha256;
-pub use password::{hash_password, verify_password};
-pub use encoding::{base64url_encode, base64url_decode};
 pub use locd_core::{Error, Result};
+pub use password::{hash_password, verify_password};
+pub use x25519::{X25519KeyPair, X25519PublicKey, X25519SecretKey};
 
 #[cfg(test)]
 mod tests {

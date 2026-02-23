@@ -1,13 +1,13 @@
-use locd_mock_dns::MockDnsServer;
-use locd_dns::IdentityRecord;
 use locd_crypto::Ed25519KeyPair;
-use std::time::{SystemTime, UNIX_EPOCH, Duration};
+use locd_dns::IdentityRecord;
+use locd_mock_dns::MockDnsServer;
+use std::net::SocketAddr;
+use std::str::FromStr;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use trust_dns_client::client::{AsyncClient, ClientHandle};
-use trust_dns_client::udp::UdpClientStream;
 use trust_dns_client::op::DnsResponse;
 use trust_dns_client::rr::{DNSClass, Name, RecordType};
-use std::str::FromStr;
-use std::net::SocketAddr;
+use trust_dns_client::udp::UdpClientStream;
 
 #[tokio::test]
 async fn test_dns_server_responds_to_queries() {
@@ -24,9 +24,7 @@ async fn test_dns_server_responds_to_queries() {
     server.add_identity_record("test.com", record);
 
     // Start server in background
-    let server_handle = tokio::spawn(async move {
-        server.start().await
-    });
+    let server_handle = tokio::spawn(async move { server.start().await });
 
     // Give server time to start
     tokio::time::sleep(Duration::from_millis(200)).await;
@@ -41,7 +39,10 @@ async fn test_dns_server_responds_to_queries() {
 
     // Query the DNS server
     let name = Name::from_str("_locd.test.com.").unwrap();
-    let response: DnsResponse = client.query(name, DNSClass::IN, RecordType::TXT).await.unwrap();
+    let response: DnsResponse = client
+        .query(name, DNSClass::IN, RecordType::TXT)
+        .await
+        .unwrap();
 
     // Verify response
     let answers = response.answers();
@@ -58,9 +59,7 @@ async fn test_dns_server_nxdomain_for_unknown() {
     let server = MockDnsServer::new(15354);
 
     // Start server in background
-    let server_handle = tokio::spawn(async move {
-        server.start().await
-    });
+    let server_handle = tokio::spawn(async move { server.start().await });
 
     // Give server time to start
     tokio::time::sleep(Duration::from_millis(200)).await;
@@ -110,9 +109,7 @@ async fn test_dns_server_multiple_records() {
     server.add_identity_record("multi.com", record2);
 
     // Start server in background
-    let server_handle = tokio::spawn(async move {
-        server.start().await
-    });
+    let server_handle = tokio::spawn(async move { server.start().await });
 
     // Give server time to start
     tokio::time::sleep(Duration::from_millis(200)).await;
@@ -126,7 +123,10 @@ async fn test_dns_server_multiple_records() {
 
     // Query the DNS server
     let name = Name::from_str("_locd.multi.com.").unwrap();
-    let response: DnsResponse = client.query(name, DNSClass::IN, RecordType::TXT).await.unwrap();
+    let response: DnsResponse = client
+        .query(name, DNSClass::IN, RecordType::TXT)
+        .await
+        .unwrap();
 
     // Verify response has both records
     let answers = response.answers();

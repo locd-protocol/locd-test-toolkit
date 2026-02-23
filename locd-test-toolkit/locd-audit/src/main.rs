@@ -59,11 +59,18 @@ fn main() -> anyhow::Result<()> {
             }
 
             println!("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            println!("📊 Summary: {} checks, {} mitigated, {} vulnerable",
-                reports.len(), mitigated_count, vulnerable_count);
+            println!(
+                "📊 Summary: {} checks, {} mitigated, {} vulnerable",
+                reports.len(),
+                mitigated_count,
+                vulnerable_count
+            );
 
             if vulnerable_count > 0 {
-                println!("\n⚠️  WARNING: {} vulnerable items found!", vulnerable_count);
+                println!(
+                    "\n⚠️  WARNING: {} vulnerable items found!",
+                    vulnerable_count
+                );
             } else {
                 println!("\n✅ No vulnerabilities detected!");
             }
@@ -129,8 +136,14 @@ fn run_timing_analysis(samples: usize, threshold: f64) {
 }
 
 fn print_timing_result(name: &str, analysis: &timing::TimingAnalysis) {
-    let status = if analysis.suspicious { "⚠️ " } else { "✅" };
-    println!("    {status} {name}: mean={:.2}µs, variance={:.2}%",
+    let status = if analysis.suspicious {
+        "⚠️ "
+    } else {
+        "✅"
+    };
+    println!(
+        "    {status} {name}: mean={:.2}µs, variance={:.2}%",
         analysis.mean.as_micros(),
-        analysis.max_variance);
+        analysis.max_variance
+    );
 }

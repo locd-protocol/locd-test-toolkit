@@ -60,3 +60,42 @@ locd-delegation = { path = "crates/locd-delegation" }
 locd-verification = { path = "crates/locd-verification" }
 locd-revocation = { path = "crates/locd-revocation" }
 locd-test-vectors = { path = "crates/locd-test-vectors" }
+
+[package]
+name = "locd-examples"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+locd-core.workspace = true
+locd-crypto.workspace = true
+locd-delegation.workspace = true
+locd-dns.workspace = true
+locd-verification.workspace = true
+locd-revocation.workspace = true
+locd-test-vectors.workspace = true
+
+[[example]]
+name = "01_key_generation"
+path = "examples/01_key_generation.rs"
+
+[[example]]
+name = "02_delegation_token"
+path = "examples/02_delegation_token.rs"
+
+[[example]]
+name = "03_verification_flow"
+path = "examples/03_verification_flow.rs"
+
+[[example]]
+name = "04_dns_records"
+path = "examples/04_dns_records.rs"
+
+[[example]]
+name = "05_revocation"
+path = "examples/05_revocation.rs"
+
+[[example]]
+name = "06_complete_workflow"
+path = "examples/06_complete_workflow.rs"

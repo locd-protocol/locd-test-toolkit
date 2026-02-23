@@ -2,8 +2,8 @@
 //!
 //! Generate, format, and validate DNS TXT records for the Loc'd Protocol.
 
-use clap::{Parser, Subcommand};
 use anyhow::{Context, Result};
+use clap::{Parser, Subcommand};
 use locd_core::types::IdentityDomain;
 use locd_crypto::Ed25519PublicKey;
 use locd_dns::{IdentityRecord, RevocationRecord};
@@ -83,13 +83,26 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Identity { domain, master, expiry, revocation_url, output } => {
+        Commands::Identity {
+            domain,
+            master,
+            expiry,
+            revocation_url,
+            output,
+        } => {
             generate_identity_record(domain, master, expiry, revocation_url, output)?;
         }
-        Commands::Revocation { domain, revoke, output } => {
+        Commands::Revocation {
+            domain,
+            revoke,
+            output,
+        } => {
             generate_revocation_record(domain, revoke, output)?;
         }
-        Commands::Validate { record, record_type } => {
+        Commands::Validate {
+            record,
+            record_type,
+        } => {
             validate_record(record, record_type)?;
         }
         Commands::Info { domain } => {
@@ -218,46 +231,45 @@ fn validate_record(record: String, record_type: String) -> Result<()> {
     eprintln!("Validating {} record...", record_type);
 
     match record_type.as_str() {
-        "identity" => {
-            match IdentityRecord::from_txt_record(&record) {
-                Ok(rec) => {
-                    eprintln!("\n✓ Valid identity record");
-                    eprintln!("  Version: {}", rec.version);
-                    eprintln!("  Algorithm: {}", rec.algorithm);
-                    eprintln!("  Public key: {}", rec.public_key);
-                    eprintln!("  Timestamp: {}", rec.timestamp);
-                    if let Some(exp) = rec.expiry {
-                        eprintln!("  Expiry: {}", exp);
-                    }
-                    if let Some(rev) = rec.revocation_endpoint {
-                        eprintln!("  Revocation URL: {}", rev);
-                    }
+        "identity" => match IdentityRecord::from_txt_record(&record) {
+            Ok(rec) => {
+                eprintln!("\n✓ Valid identity record");
+                eprintln!("  Version: {}", rec.version);
+                eprintln!("  Algorithm: {}", rec.algorithm);
+                eprintln!("  Public key: {}", rec.public_key);
+                eprintln!("  Timestamp: {}", rec.timestamp);
+                if let Some(exp) = rec.expiry {
+                    eprintln!("  Expiry: {}", exp);
                 }
-                Err(e) => {
-                    eprintln!("\n✗ Invalid identity record: {}", e);
-                    return Err(e.into());
+                if let Some(rev) = rec.revocation_endpoint {
+                    eprintln!("  Revocation URL: {}", rev);
                 }
             }
-        }
-        "revocation" => {
-            match RevocationRecord::from_txt_record(&record) {
-                Ok(rec) => {
-                    eprintln!("\n✓ Valid revocation record");
-                    eprintln!("  Version: {}", rec.version);
-                    eprintln!("  Revoked IDs: {} entries", rec.revoked_ids.len());
-                    eprintln!("  Timestamp: {}", rec.timestamp);
-                    for (i, id) in rec.revoked_ids.iter().enumerate() {
-                        eprintln!("    {}: {}", i + 1, id);
-                    }
-                }
-                Err(e) => {
-                    eprintln!("\n✗ Invalid revocation record: {}", e);
-                    return Err(e.into());
+            Err(e) => {
+                eprintln!("\n✗ Invalid identity record: {}", e);
+                return Err(e.into());
+            }
+        },
+        "revocation" => match RevocationRecord::from_txt_record(&record) {
+            Ok(rec) => {
+                eprintln!("\n✓ Valid revocation record");
+                eprintln!("  Version: {}", rec.version);
+                eprintln!("  Revoked IDs: {} entries", rec.revoked_ids.len());
+                eprintln!("  Timestamp: {}", rec.timestamp);
+                for (i, id) in rec.revoked_ids.iter().enumerate() {
+                    eprintln!("    {}: {}", i + 1, id);
                 }
             }
-        }
+            Err(e) => {
+                eprintln!("\n✗ Invalid revocation record: {}", e);
+                return Err(e.into());
+            }
+        },
         _ => {
-            anyhow::bail!("Unknown record type: {}. Use 'identity' or 'revocation'", record_type);
+            anyhow::bail!(
+                "Unknown record type: {}. Use 'identity' or 'revocation'",
+                record_type
+            );
         }
     }
 

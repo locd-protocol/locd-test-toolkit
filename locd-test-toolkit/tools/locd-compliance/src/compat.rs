@@ -173,7 +173,10 @@ pub fn test_token_longevity() -> Result<()> {
         .build()?;
 
     // Should not be expired
-    assert!(!DelegationValidator::is_expired(&token, current_timestamp()));
+    assert!(!DelegationValidator::is_expired(
+        &token,
+        current_timestamp()
+    ));
 
     // Should serialize/deserialize
     let cbor = token.sign(&master)?;
@@ -227,7 +230,10 @@ pub fn run_all_compat_tests(verbose: bool) -> (usize, usize, usize) {
         ("Signature format (64 bytes)", test_signature_format_compat),
         ("CBOR version marker", test_cbor_version_marker),
         ("Token longevity (1 year)", test_token_longevity),
-        ("CBOR field order independence", test_cbor_field_order_independence),
+        (
+            "CBOR field order independence",
+            test_cbor_field_order_independence,
+        ),
     ];
 
     let mut total = 0;

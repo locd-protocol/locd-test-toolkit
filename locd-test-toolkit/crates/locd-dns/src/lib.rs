@@ -10,9 +10,9 @@ pub mod records;
 pub mod resolver;
 
 // Re-export commonly used items
+pub use locd_core::{Error, Result};
 pub use records::{IdentityRecord, RevocationRecord, RotationRecord};
 pub use resolver::{DnsResolver, QueryOptions};
-pub use locd_core::{Error, Result};
 
 #[cfg(test)]
 mod tests {

@@ -2,8 +2,8 @@
 //!
 //! Generate, import, export, and inspect Ed25519 keys for the Loc'd Protocol.
 
-use clap::{Parser, Subcommand};
 use anyhow::{Context, Result};
+use clap::{Parser, Subcommand};
 use locd_crypto::{Ed25519KeyPair, Ed25519PublicKey};
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -87,7 +87,11 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Generate { key_type, output, public } => {
+        Commands::Generate {
+            key_type,
+            output,
+            public,
+        } => {
             generate_key(key_type, output, public)?;
         }
         Commands::Info { key_file } => {
@@ -96,7 +100,11 @@ fn main() -> Result<()> {
         Commands::Export { key_file, format } => {
             export_key(key_file, format)?;
         }
-        Commands::Import { json_file, output, format } => {
+        Commands::Import {
+            json_file,
+            output,
+            format,
+        } => {
             import_key(json_file, output, format)?;
         }
         Commands::PublicKey { secret_key, output } => {
@@ -132,14 +140,17 @@ fn generate_key(key_type: Option<String>, output: PathBuf, save_public: bool) ->
     // Display key info
     eprintln!("\nKey Information:");
     eprintln!("  Type: {}", key_type_str);
-    eprintln!("  Public key (hex): {}", hex::encode(keypair.public_key().to_bytes()));
+    eprintln!(
+        "  Public key (hex): {}",
+        hex::encode(keypair.public_key().to_bytes())
+    );
 
     Ok(())
 }
 
 fn show_info(key_file: PathBuf) -> Result<()> {
-    let bytes = fs::read(&key_file)
-        .with_context(|| format!("Failed to read key file {:?}", key_file))?;
+    let bytes =
+        fs::read(&key_file).with_context(|| format!("Failed to read key file {:?}", key_file))?;
 
     match bytes.len() {
         32 => {
@@ -149,7 +160,10 @@ fn show_info(key_file: PathBuf) -> Result<()> {
                 println!("Key Type: Secret Key (Ed25519)");
                 println!("File: {:?}", key_file);
                 println!("Size: {} bytes", bytes.len());
-                println!("Public key (hex): {}", hex::encode(keypair.public_key().to_bytes()));
+                println!(
+                    "Public key (hex): {}",
+                    hex::encode(keypair.public_key().to_bytes())
+                );
             } else if let Ok(pubkey) = Ed25519PublicKey::from_bytes(&bytes) {
                 println!("Key Type: Public Key (Ed25519)");
                 println!("File: {:?}", key_file);
@@ -172,8 +186,8 @@ fn export_key(key_file: PathBuf, format: String) -> Result<()> {
         anyhow::bail!("Only 'json' format is supported");
     }
 
-    let bytes = fs::read(&key_file)
-        .with_context(|| format!("Failed to read key file {:?}", key_file))?;
+    let bytes =
+        fs::read(&key_file).with_context(|| format!("Failed to read key file {:?}", key_file))?;
 
     if bytes.len() != 32 {
         anyhow::bail!("Invalid key size: expected 32 bytes, got {}", bytes.len());
@@ -217,8 +231,7 @@ fn import_key(json_file: PathBuf, output: PathBuf, format: String) -> Result<()>
         hex::decode(&export.public_key_hex)?
     };
 
-    fs::write(&output, &bytes)
-        .with_context(|| format!("Failed to write key to {:?}", output))?;
+    fs::write(&output, &bytes).with_context(|| format!("Failed to write key to {:?}", output))?;
 
     eprintln!("✓ Key imported to: {:?}", output);
 

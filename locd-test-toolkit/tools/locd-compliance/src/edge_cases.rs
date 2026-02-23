@@ -64,7 +64,10 @@ pub fn test_timestamp_max_value() -> Result<()> {
         .build()?;
 
     // Should not be expired (we're not in year 584 billion)
-    assert!(!DelegationValidator::is_expired(&token, current_timestamp()));
+    assert!(!DelegationValidator::is_expired(
+        &token,
+        current_timestamp()
+    ));
     assert_eq!(token.expires_at, far_future);
     Ok(())
 }
@@ -186,7 +189,11 @@ pub fn test_delegation_id_uniqueness() -> Result<()> {
     let id2 = DelegationId::new();
 
     // IDs should be unique
-    assert_ne!(id1.to_string(), id2.to_string(), "Delegation IDs should be unique");
+    assert_ne!(
+        id1.to_string(),
+        id2.to_string(),
+        "Delegation IDs should be unique"
+    );
     Ok(())
 }
 
@@ -255,8 +262,14 @@ pub fn test_timestamp_epoch_zero() -> Result<()> {
 /// Run all edge case tests
 pub fn run_all_edge_case_tests(verbose: bool) -> (usize, usize, usize) {
     let tests: Vec<(&str, fn() -> Result<()>)> = vec![
-        ("Delegation expires at boundary", test_delegation_expires_at_boundary),
-        ("Delegation expires just in future", test_delegation_expires_just_future),
+        (
+            "Delegation expires at boundary",
+            test_delegation_expires_at_boundary,
+        ),
+        (
+            "Delegation expires just in future",
+            test_delegation_expires_just_future,
+        ),
         ("Timestamp at max value", test_timestamp_max_value),
         ("Maximum domain length", test_max_domain_length),
         ("Minimum domain length", test_min_domain_length),

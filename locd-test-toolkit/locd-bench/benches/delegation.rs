@@ -1,7 +1,7 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
-use locd_crypto::Ed25519KeyPair;
-use locd_delegation::{DelegationToken, current_timestamp};
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use locd_core::IdentityDomain;
+use locd_crypto::Ed25519KeyPair;
+use locd_delegation::{current_timestamp, DelegationToken};
 
 /// Benchmark delegation token creation
 /// Target: <5ms
@@ -19,7 +19,7 @@ fn bench_delegation_token_create(c: &mut Criterion) {
                     .expires_at(current_timestamp() + 86400)
                     .service("api.example.com")
                     .action("read")
-                    .build()
+                    .build(),
             )
         })
     });
@@ -42,9 +42,7 @@ fn bench_delegation_token_sign(c: &mut Criterion) {
         .unwrap();
 
     c.bench_function("delegation_token_sign", |b| {
-        b.iter(|| {
-            black_box(token.sign(&master_key))
-        })
+        b.iter(|| black_box(token.sign(&master_key)))
     });
 }
 
@@ -67,9 +65,7 @@ fn bench_delegation_token_verify(c: &mut Criterion) {
     let signed_token = token.sign(&master_key).unwrap();
 
     c.bench_function("delegation_token_verify", |b| {
-        b.iter(|| {
-            black_box(signed_token.verify())
-        })
+        b.iter(|| black_box(signed_token.verify()))
     });
 }
 
@@ -89,11 +85,7 @@ fn bench_cbor_encode(c: &mut Criterion) {
         .build()
         .unwrap();
 
-    c.bench_function("cbor_encode", |b| {
-        b.iter(|| {
-            black_box(token.to_cbor())
-        })
-    });
+    c.bench_function("cbor_encode", |b| b.iter(|| black_box(token.to_cbor())));
 }
 
 /// Benchmark CBOR decoding
@@ -115,9 +107,7 @@ fn bench_cbor_decode(c: &mut Criterion) {
     let cbor_bytes = token.to_cbor().unwrap();
 
     c.bench_function("cbor_decode", |b| {
-        b.iter(|| {
-            black_box(DelegationToken::from_cbor(&cbor_bytes))
-        })
+        b.iter(|| black_box(DelegationToken::from_cbor(&cbor_bytes)))
     });
 }
 
@@ -129,9 +119,7 @@ fn bench_delegation_chain_depths(c: &mut Criterion) {
         let tokens = create_delegation_chain(*depth);
 
         group.bench_with_input(BenchmarkId::from_parameter(depth), depth, |b, _| {
-            b.iter(|| {
-                black_box(verify_delegation_chain(&tokens))
-            });
+            b.iter(|| black_box(verify_delegation_chain(&tokens)));
         });
     }
     group.finish();
@@ -192,7 +180,7 @@ fn bench_delegation_constraints(c: &mut Criterion) {
                     .expires_at(current_timestamp() + 86400)
                     .service("api.example.com")
                     .action("read")
-                    .build()
+                    .build(),
             )
         })
     });
@@ -212,7 +200,7 @@ fn bench_delegation_constraints(c: &mut Criterion) {
                     .action("read")
                     .action("write")
                     .action("delete")
-                    .build()
+                    .build(),
             )
         })
     });

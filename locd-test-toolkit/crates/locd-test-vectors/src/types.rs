@@ -40,11 +40,11 @@ pub struct CryptoVectors {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Ed25519TestCase {
     pub description: String,
-    pub seed: String,              // Hex
-    pub private_key: String,       // Hex
-    pub public_key: String,        // Hex (32 bytes)
-    pub message: String,           // Hex
-    pub signature: String,         // Hex (64 bytes)
+    pub seed: String,        // Hex
+    pub private_key: String, // Hex
+    pub public_key: String,  // Hex (32 bytes)
+    pub message: String,     // Hex
+    pub signature: String,   // Hex (64 bytes)
     pub should_verify: bool,
 }
 
@@ -52,41 +52,41 @@ pub struct Ed25519TestCase {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct X25519TestCase {
     pub description: String,
-    pub alice_private: String,     // Hex
-    pub alice_public: String,      // Hex
-    pub bob_private: String,       // Hex
-    pub bob_public: String,        // Hex
-    pub shared_secret: String,     // Hex
+    pub alice_private: String, // Hex
+    pub alice_public: String,  // Hex
+    pub bob_private: String,   // Hex
+    pub bob_public: String,    // Hex
+    pub shared_secret: String, // Hex
 }
 
 /// AEAD encryption test case
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AeadTestCase {
     pub description: String,
-    pub key: String,               // Hex (32 bytes)
-    pub nonce: String,             // Hex (12 bytes for ChaCha20)
-    pub plaintext: String,         // Hex
-    pub aad: String,               // Hex (additional authenticated data)
-    pub ciphertext: String,        // Hex (includes auth tag)
+    pub key: String,        // Hex (32 bytes)
+    pub nonce: String,      // Hex (12 bytes for ChaCha20)
+    pub plaintext: String,  // Hex
+    pub aad: String,        // Hex (additional authenticated data)
+    pub ciphertext: String, // Hex (includes auth tag)
 }
 
 /// HKDF key derivation test case
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HkdfTestCase {
     pub description: String,
-    pub ikm: String,               // Input key material (hex)
-    pub salt: String,              // Salt (hex)
-    pub info: String,              // Context info (hex)
-    pub length: usize,             // Output length in bytes
-    pub okm: String,               // Output key material (hex)
+    pub ikm: String,   // Input key material (hex)
+    pub salt: String,  // Salt (hex)
+    pub info: String,  // Context info (hex)
+    pub length: usize, // Output length in bytes
+    pub okm: String,   // Output key material (hex)
 }
 
 /// Base64url encoding test case
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Base64UrlTestCase {
     pub description: String,
-    pub input: String,             // Hex
-    pub output: String,            // Base64url (no padding)
+    pub input: String,  // Hex
+    pub output: String, // Base64url (no padding)
 }
 
 /// Key hierarchy test vectors
@@ -101,11 +101,11 @@ pub struct KeyVectors {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct KeyTestCase {
     pub description: String,
-    pub seed: String,              // Hex seed for deterministic generation
-    pub public_key: String,        // Hex (32 bytes)
-    pub created_at: u64,           // Unix timestamp
-    pub expires_at: Option<u64>,   // Unix timestamp
-    pub is_expired: bool,          // At time of vector creation
+    pub seed: String,            // Hex seed for deterministic generation
+    pub public_key: String,      // Hex (32 bytes)
+    pub created_at: u64,         // Unix timestamp
+    pub expires_at: Option<u64>, // Unix timestamp
+    pub is_expired: bool,        // At time of vector creation
 }
 
 /// Delegation token test vectors
@@ -128,8 +128,8 @@ pub struct DelegationTestCase {
     pub services: Vec<String>,
     pub actions: Vec<String>,
     pub max_uses: Option<u32>,
-    pub token_cbor: String,        // Hex-encoded CBOR
-    pub signature: String,         // Hex (64 bytes)
+    pub token_cbor: String, // Hex-encoded CBOR
+    pub signature: String,  // Hex (64 bytes)
     pub should_verify: bool,
 }
 
@@ -146,10 +146,10 @@ pub struct DnsVectors {
 pub struct IdentityRecordTestCase {
     pub description: String,
     pub domain: String,
-    pub dns_name: String,          // _locd.domain
-    pub public_key: String,        // Base64url
+    pub dns_name: String,   // _locd.domain
+    pub public_key: String, // Base64url
     pub timestamp: u64,
-    pub txt_record: String,        // Full TXT record value
+    pub txt_record: String, // Full TXT record value
     pub should_parse: bool,
 }
 
@@ -158,10 +158,10 @@ pub struct IdentityRecordTestCase {
 pub struct RevocationRecordTestCase {
     pub description: String,
     pub domain: String,
-    pub dns_name: String,          // _locd-revoke.domain
-    pub revoked_ids: Vec<String>,  // UUIDs
+    pub dns_name: String,         // _locd-revoke.domain
+    pub revoked_ids: Vec<String>, // UUIDs
     pub timestamp: u64,
-    pub txt_record: String,        // Full TXT record value
+    pub txt_record: String, // Full TXT record value
     pub should_parse: bool,
 }
 
@@ -170,12 +170,12 @@ pub struct RevocationRecordTestCase {
 pub struct RotationRecordTestCase {
     pub description: String,
     pub domain: String,
-    pub dns_name: String,          // _locd-rotate.domain
-    pub old_key: String,           // Base64url
-    pub new_key: String,           // Base64url
+    pub dns_name: String, // _locd-rotate.domain
+    pub old_key: String,  // Base64url
+    pub new_key: String,  // Base64url
     pub timestamp: u64,
-    pub signature: String,         // Base64url (by old key)
-    pub txt_record: String,        // Full TXT record value
+    pub signature: String,  // Base64url (by old key)
+    pub txt_record: String, // Full TXT record value
     pub should_parse: bool,
 }
 
@@ -195,12 +195,12 @@ pub struct VerificationFlowTestCase {
     pub claimant_device_key_public: String,
     pub verifier_domain: String,
     pub verifier_wg_public_key: String,
-    pub challenge_nonce: String,   // Hex (32 bytes)
+    pub challenge_nonce: String, // Hex (32 bytes)
     pub challenge_timestamp: u64,
-    pub delegation_id: String,     // UUID
+    pub delegation_id: String,      // UUID
     pub response_signature: String, // Hex (64 bytes)
-    pub expected_result: bool,     // Should verification succeed?
-    pub expected_reason: String,   // ReasonCode name
+    pub expected_result: bool,      // Should verification succeed?
+    pub expected_reason: String,    // ReasonCode name
 }
 
 /// Protocol message test vectors
@@ -226,10 +226,10 @@ pub struct HelloMessageTestCase {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChallengeMessageTestCase {
     pub description: String,
-    pub nonce: String,             // Hex (32 bytes)
+    pub nonce: String, // Hex (32 bytes)
     pub timestamp: u64,
     pub verifier_domain: String,
-    pub cbor_encoded: String,      // Hex
+    pub cbor_encoded: String, // Hex
     pub should_parse: bool,
 }
 
@@ -237,10 +237,10 @@ pub struct ChallengeMessageTestCase {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ResponseMessageTestCase {
     pub description: String,
-    pub signature: String,         // Hex (64 bytes)
-    pub delegation_token: String,  // Hex CBOR
+    pub signature: String,                 // Hex (64 bytes)
+    pub delegation_token: String,          // Hex CBOR
     pub sub_delegation_chain: Vec<String>, // Vec of hex CBOR
-    pub cbor_encoded: String,      // Hex
+    pub cbor_encoded: String,              // Hex
     pub should_parse: bool,
 }
 
@@ -249,8 +249,8 @@ pub struct ResponseMessageTestCase {
 pub struct ResultMessageTestCase {
     pub description: String,
     pub verified: bool,
-    pub reason: String,            // ReasonCode name
+    pub reason: String,                // ReasonCode name
     pub wireguard_key: Option<String>, // Hex (32 bytes)
-    pub cbor_encoded: String,      // Hex
+    pub cbor_encoded: String,          // Hex
     pub should_parse: bool,
 }

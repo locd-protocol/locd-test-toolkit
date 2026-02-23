@@ -50,7 +50,10 @@ pub fn test_reject_invalid_signature() -> Result<()> {
 
     // Should fail to verify
     let result = DelegationToken::from_cbor(&cbor);
-    assert!(result.is_err(), "Tampered signature should fail verification");
+    assert!(
+        result.is_err(),
+        "Tampered signature should fail verification"
+    );
     Ok(())
 }
 
@@ -73,16 +76,20 @@ pub fn test_reject_empty_cbor() -> Result<()> {
 /// Test that malformed DNS TXT record is rejected
 pub fn test_reject_malformed_txt_record() -> Result<()> {
     let malformed_records = vec![
-        "",                           // Empty
-        "not-a-valid-record",        // No structure
-        "v=1",                        // Missing fields
-        "v=999;k=abc",               // Invalid version
-        "k=not-base64;t=123",        // Invalid base64
+        "",                   // Empty
+        "not-a-valid-record", // No structure
+        "v=1",                // Missing fields
+        "v=999;k=abc",        // Invalid version
+        "k=not-base64;t=123", // Invalid base64
     ];
 
     for record in malformed_records {
         let result = IdentityRecord::from_txt_record(record);
-        assert!(result.is_err(), "Malformed TXT record '{}' should be rejected", record);
+        assert!(
+            result.is_err(),
+            "Malformed TXT record '{}' should be rejected",
+            record
+        );
     }
     Ok(())
 }
@@ -147,7 +154,10 @@ pub fn test_negative_expiry() -> Result<()> {
 pub fn test_empty_delegation_id() -> Result<()> {
     // DelegationId::new() should always generate a valid ID
     let id = DelegationId::new();
-    assert!(!id.to_string().is_empty(), "Delegation ID should not be empty");
+    assert!(
+        !id.to_string().is_empty(),
+        "Delegation ID should not be empty"
+    );
     Ok(())
 }
 
@@ -166,9 +176,9 @@ pub fn test_reject_overlong_domain() -> Result<()> {
 /// Test invalid domain characters
 pub fn test_invalid_domain_chars() -> Result<()> {
     let invalid_domains = vec![
-        "example .com",      // Space
-        "example\n.com",     // Newline
-        "example\t.com",     // Tab
+        "example .com",  // Space
+        "example\n.com", // Newline
+        "example\t.com", // Tab
     ];
 
     for domain_str in invalid_domains {
@@ -220,7 +230,10 @@ pub fn test_very_short_expiry() -> Result<()> {
         .build()?;
 
     // Should not be expired yet (within 1 second)
-    assert!(!DelegationValidator::is_expired(&token, current_timestamp()));
+    assert!(!DelegationValidator::is_expired(
+        &token,
+        current_timestamp()
+    ));
     Ok(())
 }
 
@@ -275,7 +288,10 @@ pub fn run_all_negative_tests(verbose: bool) -> (usize, usize, usize) {
         ("Reject invalid signature", test_reject_invalid_signature),
         ("Reject corrupted CBOR", test_reject_corrupted_cbor),
         ("Reject empty CBOR", test_reject_empty_cbor),
-        ("Reject malformed TXT records", test_reject_malformed_txt_record),
+        (
+            "Reject malformed TXT records",
+            test_reject_malformed_txt_record,
+        ),
         ("Reject wrong message", test_reject_wrong_message),
         ("Handle self-delegation", test_self_delegation),
         ("Handle negative expiry", test_negative_expiry),

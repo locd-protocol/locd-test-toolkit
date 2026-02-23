@@ -102,15 +102,14 @@ impl HelloMessage {
 
         let value = ciborium::Value::Map(map);
         let mut buffer = Vec::new();
-        ciborium::into_writer(&value, &mut buffer)
-            .map_err(|e| Error::Encoding(e.to_string()))?;
+        ciborium::into_writer(&value, &mut buffer).map_err(|e| Error::Encoding(e.to_string()))?;
         Ok(buffer)
     }
 
     /// Decode from CBOR bytes
     pub fn decode(data: &[u8]) -> Result<Self> {
-        let value: ciborium::Value = ciborium::from_reader(Cursor::new(data))
-            .map_err(|e| Error::Decoding(e.to_string()))?;
+        let value: ciborium::Value =
+            ciborium::from_reader(Cursor::new(data)).map_err(|e| Error::Decoding(e.to_string()))?;
 
         let map = match value {
             ciborium::Value::Map(m) => m,
@@ -202,15 +201,14 @@ impl ChallengeMessage {
 
         let value = ciborium::Value::Map(map);
         let mut buffer = Vec::new();
-        ciborium::into_writer(&value, &mut buffer)
-            .map_err(|e| Error::Encoding(e.to_string()))?;
+        ciborium::into_writer(&value, &mut buffer).map_err(|e| Error::Encoding(e.to_string()))?;
         Ok(buffer)
     }
 
     /// Decode from CBOR bytes
     pub fn decode(data: &[u8]) -> Result<Self> {
-        let value: ciborium::Value = ciborium::from_reader(Cursor::new(data))
-            .map_err(|e| Error::Decoding(e.to_string()))?;
+        let value: ciborium::Value =
+            ciborium::from_reader(Cursor::new(data)).map_err(|e| Error::Decoding(e.to_string()))?;
 
         let map = match value {
             ciborium::Value::Map(m) => m,
@@ -305,15 +303,14 @@ impl ResponseMessage {
 
         let value = ciborium::Value::Map(map);
         let mut buffer = Vec::new();
-        ciborium::into_writer(&value, &mut buffer)
-            .map_err(|e| Error::Encoding(e.to_string()))?;
+        ciborium::into_writer(&value, &mut buffer).map_err(|e| Error::Encoding(e.to_string()))?;
         Ok(buffer)
     }
 
     /// Decode from CBOR bytes
     pub fn decode(data: &[u8]) -> Result<Self> {
-        let value: ciborium::Value = ciborium::from_reader(Cursor::new(data))
-            .map_err(|e| Error::Decoding(e.to_string()))?;
+        let value: ciborium::Value =
+            ciborium::from_reader(Cursor::new(data)).map_err(|e| Error::Decoding(e.to_string()))?;
 
         let map = match value {
             ciborium::Value::Map(m) => m,
@@ -424,15 +421,14 @@ impl ResultMessage {
 
         let value = ciborium::Value::Map(map);
         let mut buffer = Vec::new();
-        ciborium::into_writer(&value, &mut buffer)
-            .map_err(|e| Error::Encoding(e.to_string()))?;
+        ciborium::into_writer(&value, &mut buffer).map_err(|e| Error::Encoding(e.to_string()))?;
         Ok(buffer)
     }
 
     /// Decode from CBOR bytes
     pub fn decode(data: &[u8]) -> Result<Self> {
-        let value: ciborium::Value = ciborium::from_reader(Cursor::new(data))
-            .map_err(|e| Error::Decoding(e.to_string()))?;
+        let value: ciborium::Value =
+            ciborium::from_reader(Cursor::new(data)).map_err(|e| Error::Decoding(e.to_string()))?;
 
         let map = match value {
             ciborium::Value::Map(m) => m,
@@ -502,10 +498,7 @@ fn get_uint_field(map: &[(ciborium::Value, ciborium::Value)], key: i64) -> Resul
         Some(ciborium::Value::Integer(i)) => {
             let val = i128::from(*i);
             if val < 0 {
-                return Err(Error::Custom(format!(
-                    "field {} must be non-negative",
-                    key
-                )));
+                return Err(Error::Custom(format!("field {} must be non-negative", key)));
             }
             Ok(val as u64)
         }
@@ -556,7 +549,8 @@ mod tests {
     #[test]
     fn test_challenge_message_roundtrip() {
         let nonce = vec![0u8; 32];
-        let msg = ChallengeMessage::new(nonce.clone(), 1234567890, "verifier.com".to_string()).unwrap();
+        let msg =
+            ChallengeMessage::new(nonce.clone(), 1234567890, "verifier.com".to_string()).unwrap();
 
         let encoded = msg.encode().unwrap();
         let decoded = ChallengeMessage::decode(&encoded).unwrap();

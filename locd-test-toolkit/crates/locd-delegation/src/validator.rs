@@ -189,8 +189,7 @@ mod tests {
     #[test]
     fn test_expired_delegation() {
         let token = create_test_token();
-        let context = ValidationContext::new()
-            .with_timestamp(token.expires_at + 1);
+        let context = ValidationContext::new().with_timestamp(token.expires_at + 1);
 
         let result = DelegationValidator::validate(&token, &context);
         assert!(result.is_err());
@@ -289,7 +288,10 @@ mod tests {
         let token = create_test_token();
         assert!(!DelegationValidator::is_expired(&token, token.issued_at));
         assert!(DelegationValidator::is_expired(&token, token.expires_at));
-        assert!(DelegationValidator::is_expired(&token, token.expires_at + 100));
+        assert!(DelegationValidator::is_expired(
+            &token,
+            token.expires_at + 100
+        ));
     }
 
     #[test]
@@ -299,7 +301,8 @@ mod tests {
         assert!(remaining > 0);
         assert!(remaining <= 3600);
 
-        let remaining_expired = DelegationValidator::remaining_validity(&token, token.expires_at + 10);
+        let remaining_expired =
+            DelegationValidator::remaining_validity(&token, token.expires_at + 10);
         assert!(remaining_expired < 0);
     }
 }

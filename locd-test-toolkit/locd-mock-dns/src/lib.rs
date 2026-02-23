@@ -1,9 +1,10 @@
 //! Mock DNS server for local testing
 
+use locd_dns::{IdentityRecord, RevocationRecord};
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::{Arc, RwLock};
-use locd_dns::{IdentityRecord, RevocationRecord};
+use tokio::net::UdpSocket;
 use trust_dns_server::{
     authority::MessageResponseBuilder,
     proto::{
@@ -13,7 +14,6 @@ use trust_dns_server::{
     server::{Request, RequestHandler, ResponseHandler, ResponseInfo},
     ServerFuture,
 };
-use tokio::net::UdpSocket;
 
 /// Mock DNS server for testing Loc'd Protocol
 pub struct MockDnsServer {
@@ -113,11 +113,15 @@ impl RequestHandler for MockDnsHandler {
         // Only handle TXT queries
         if query.query_type() != RecordType::TXT {
             header.set_response_code(ResponseCode::NotImp);
-            let response = MessageResponseBuilder::from_message_request(request).build_no_records(header);
-            return response_handle.send_response(response).await.unwrap_or_else(|e| {
-                eprintln!("Error sending response: {}", e);
-                header.into()
-            });
+            let response =
+                MessageResponseBuilder::from_message_request(request).build_no_records(header);
+            return response_handle
+                .send_response(response)
+                .await
+                .unwrap_or_else(|e| {
+                    eprintln!("Error sending response: {}", e);
+                    header.into()
+                });
         }
 
         let mut name_str = query.name().to_string();
@@ -158,27 +162,43 @@ impl RequestHandler for MockDnsHandler {
             }
 
             header.set_response_code(ResponseCode::NoError);
-            let response = MessageResponseBuilder::from_message_request(request)
-                .build(header, answers.iter(), &[], &[], &[]);
+            let response = MessageResponseBuilder::from_message_request(request).build(
+                header,
+                answers.iter(),
+                &[],
+                &[],
+                &[],
+            );
 
-            println!("✓ Responded to query: {} ({} records)", name_str, answers.len());
+            println!(
+                "✓ Responded to query: {} ({} records)",
+                name_str,
+                answers.len()
+            );
 
-            return response_handle.send_response(response).await.unwrap_or_else(|e| {
-                eprintln!("Error sending response: {}", e);
-                header.into()
-            });
+            return response_handle
+                .send_response(response)
+                .await
+                .unwrap_or_else(|e| {
+                    eprintln!("Error sending response: {}", e);
+                    header.into()
+                });
         }
 
         // No record found
         header.set_response_code(ResponseCode::NXDomain);
-        let response = MessageResponseBuilder::from_message_request(request).build_no_records(header);
+        let response =
+            MessageResponseBuilder::from_message_request(request).build_no_records(header);
 
         println!("✗ No records found for: {}", name_str);
 
-        response_handle.send_response(response).await.unwrap_or_else(|e| {
-            eprintln!("Error sending response: {}", e);
-            header.into()
-        })
+        response_handle
+            .send_response(response)
+            .await
+            .unwrap_or_else(|e| {
+                eprintln!("Error sending response: {}", e);
+                header.into()
+            })
     }
 }
 

@@ -1,0 +1,114 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+  build-binaries:
+    name: Build ${{ matrix.os }}
+    needs: create-release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            suffix: linux-x64
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            suffix: macos-x64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            suffix: windows-x64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          target: ${{ matrix.target }}
+
+      - name: Build Release Binaries
+        run: cargo build --release --bins
+
+      - name: Create Archive (Unix)
+        if: matrix.os != 'windows-latest'
+        run: |
+          cd target/release
+          tar czf locd-tools-${{ github.ref_name }}-${{ matrix.suffix }}.tar.gz \
+            locd-keygen locd-delegate locd-verify locd-dns-tools locd-compliance locd-audit locd-mock-dns
+
+      - name: Create Archive (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          cd target/release
+          7z a locd-tools-${{ github.ref_name }}-${{ matrix.suffix }}.zip `
+            locd-keygen.exe locd-delegate.exe locd-verify.exe locd-dns-tools.exe locd-compliance.exe locd-audit.exe locd-mock-dns.exe
+
+      - name: Upload Release Asset (Unix)
+        if: matrix.os != 'windows-latest'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: target/release/locd-tools-${{ github.ref_name }}-${{ matrix.suffix }}.tar.gz
+          asset_name: locd-tools-${{ github.ref_name }}-${{ matrix.suffix }}.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload Release Asset (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: target/release/locd-tools-${{ github.ref_name }}-${{ matrix.suffix }}.zip
+          asset_name: locd-tools-${{ github.ref_name }}-${{ matrix.suffix }}.zip
+          asset_content_type: application/zip
+
+  publish-crates:
+    name: Publish to crates.io
+    needs: build-binaries
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Publish Core Crates
+        run: |
+          cargo publish -p locd-core --token ${{ secrets.CARGO_TOKEN }}
+          sleep 10
+          cargo publish -p locd-crypto --token ${{ secrets.CARGO_TOKEN }}
+          sleep 10
+          cargo publish -p locd-delegation --token ${{ secrets.CARGO_TOKEN }}
+          sleep 10
+          cargo publish -p locd-dns --token ${{ secrets.CARGO_TOKEN }}
+          sleep 10
+          cargo publish -p locd-verification --token ${{ secrets.CARGO_TOKEN }}
+          sleep 10
+          cargo publish -p locd-revocation --token ${{ secrets.CARGO_TOKEN }}
+          sleep 10
+          cargo publish -p locd-test-vectors --token ${{ secrets.CARGO_TOKEN }}

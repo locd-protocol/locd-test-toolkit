@@ -59,7 +59,11 @@ impl DefaultRevocationChecker {
     ///    b. Fetch from HTTPS (if URL available)
     ///    c. Merge results and cache
     /// 3. Return whether delegation ID is in revoked set
-    pub async fn is_revoked_async(&self, domain: &str, delegation_id: &DelegationId) -> Result<bool> {
+    pub async fn is_revoked_async(
+        &self,
+        domain: &str,
+        delegation_id: &DelegationId,
+    ) -> Result<bool> {
         let delegation_id_str = delegation_id.to_string();
 
         // Check cache
@@ -89,11 +93,18 @@ impl DefaultRevocationChecker {
         };
 
         // Check if revoked before merging (since merge consumes the data)
-        let is_revoked = dns_data.as_ref().map(|d| d.revoked_ids.contains(&delegation_id_str)).unwrap_or(false)
-            || https_data.as_ref().map(|d| d.revoked_ids.contains(&delegation_id_str)).unwrap_or(false);
+        let is_revoked = dns_data
+            .as_ref()
+            .map(|d| d.revoked_ids.contains(&delegation_id_str))
+            .unwrap_or(false)
+            || https_data
+                .as_ref()
+                .map(|d| d.revoked_ids.contains(&delegation_id_str))
+                .unwrap_or(false);
 
         // Merge and cache
-        self.cache.put_merged(domain.to_string(), dns_data, https_data);
+        self.cache
+            .put_merged(domain.to_string(), dns_data, https_data);
 
         Ok(is_revoked)
     }
@@ -127,8 +138,9 @@ pub struct BlockingRevocationChecker {
 impl BlockingRevocationChecker {
     /// Create a new blocking revocation checker
     pub fn new() -> Result<Self> {
-        let runtime = tokio::runtime::Runtime::new()
-            .map_err(|e| locd_core::Error::Custom(format!("Failed to create async runtime: {}", e)))?;
+        let runtime = tokio::runtime::Runtime::new().map_err(|e| {
+            locd_core::Error::Custom(format!("Failed to create async runtime: {}", e))
+        })?;
 
         Ok(Self {
             inner: DefaultRevocationChecker::new(),
@@ -150,7 +162,8 @@ impl BlockingRevocationChecker {
 
     /// Check if delegation is revoked (blocking)
     pub fn is_revoked_blocking(&self, domain: &str, delegation_id: &DelegationId) -> Result<bool> {
-        self.runtime.block_on(self.inner.is_revoked_async(domain, delegation_id))
+        self.runtime
+            .block_on(self.inner.is_revoked_async(domain, delegation_id))
     }
 }
 
@@ -234,11 +247,12 @@ mod tests {
         let master_key = locd_crypto::Ed25519KeyPair::generate();
         let master_pubkey = master_key.public_key();
 
-        let https_provider = MockHttpsProvider::new()
-            .with_url("example.com", "https://example.com/.well-known/locd/revocations");
+        let https_provider = MockHttpsProvider::new().with_url(
+            "example.com",
+            "https://example.com/.well-known/locd/revocations",
+        );
 
-        let key_provider = MockMasterKeyProvider::new()
-            .with_key("example.com", master_pubkey);
+        let key_provider = MockMasterKeyProvider::new().with_key("example.com", master_pubkey);
 
         let checker = DefaultRevocationChecker::new()
             .with_https_provider(Box::new(https_provider))

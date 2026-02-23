@@ -1,8 +1,6 @@
 //! Verifier logic for the Loc'd verification protocol
 
-use crate::messages::{
-    ChallengeMessage, HelloMessage, ReasonCode, ResponseMessage, ResultMessage,
-};
+use crate::messages::{ChallengeMessage, HelloMessage, ReasonCode, ResponseMessage, ResultMessage};
 use locd_core::{Error, IdentityDomain, Result};
 use locd_crypto::{Ed25519PublicKey, Ed25519Signature};
 use locd_delegation::{DelegationToken, DelegationValidator, ValidationContext};
@@ -346,11 +344,7 @@ mod tests {
             .create_response(&challenge, signed_token, chain)
             .unwrap();
 
-        let _verifier = Verifier::new(
-            IdentityDomain::new("verifier.com"),
-            vec![1, 2, 3],
-            None,
-        );
+        let _verifier = Verifier::new(IdentityDomain::new("verifier.com"), vec![1, 2, 3], None);
 
         // This would fail in verify_response due to chain depth
         // (but we can't fully test without DNS mock)

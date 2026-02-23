@@ -90,7 +90,10 @@ impl DelegationToken {
                 .iter()
                 .map(|s| Value::Text(s.as_str().to_string()))
                 .collect();
-            map.push((Value::Integer(CBOR_KEY_SERVICES.into()), Value::Array(services)));
+            map.push((
+                Value::Integer(CBOR_KEY_SERVICES.into()),
+                Value::Array(services),
+            ));
         }
 
         // Actions
@@ -100,7 +103,10 @@ impl DelegationToken {
                 .iter()
                 .map(|a| Value::Text(a.as_str().to_string()))
                 .collect();
-            map.push((Value::Integer(CBOR_KEY_ACTIONS.into()), Value::Array(actions)));
+            map.push((
+                Value::Integer(CBOR_KEY_ACTIONS.into()),
+                Value::Array(actions),
+            ));
         }
 
         // Max uses
@@ -159,7 +165,10 @@ impl DelegationToken {
         let get_bytes = |key: i64| -> Result<Vec<u8>> {
             match find_value(key) {
                 Some(Value::Bytes(b)) => Ok(b.clone()),
-                _ => Err(Error::InvalidDelegation(format!("Missing or invalid key {}", key))),
+                _ => Err(Error::InvalidDelegation(format!(
+                    "Missing or invalid key {}",
+                    key
+                ))),
             }
         };
 
@@ -168,14 +177,20 @@ impl DelegationToken {
                 Some(Value::Integer(i)) => Ok((*i).try_into().map_err(|_| {
                     Error::InvalidDelegation(format!("Invalid integer for key {}", key))
                 })?),
-                _ => Err(Error::InvalidDelegation(format!("Missing or invalid key {}", key))),
+                _ => Err(Error::InvalidDelegation(format!(
+                    "Missing or invalid key {}",
+                    key
+                ))),
             }
         };
 
         let get_text = |key: i64| -> Result<String> {
             match find_value(key) {
                 Some(Value::Text(s)) => Ok(s.clone()),
-                _ => Err(Error::InvalidDelegation(format!("Missing or invalid key {}", key))),
+                _ => Err(Error::InvalidDelegation(format!(
+                    "Missing or invalid key {}",
+                    key
+                ))),
             }
         };
 
@@ -220,10 +235,8 @@ impl DelegationToken {
             _ => None,
         };
 
-        let delegation_id =
-            DelegationId::from_string(&get_text(CBOR_KEY_DELEGATION_ID)?).map_err(|e| {
-                Error::InvalidDelegation(format!("Invalid delegation ID: {}", e))
-            })?;
+        let delegation_id = DelegationId::from_string(&get_text(CBOR_KEY_DELEGATION_ID)?)
+            .map_err(|e| Error::InvalidDelegation(format!("Invalid delegation ID: {}", e)))?;
 
         Ok(Self {
             delegator: get_bytes(CBOR_KEY_DELEGATOR)?,
@@ -257,7 +270,7 @@ impl DelegationToken {
 
         let structure = Value::Array(vec![
             Value::Bytes(vec![]), // empty protected header
-            Value::Map(vec![]),    // empty unprotected header
+            Value::Map(vec![]),   // empty unprotected header
             Value::Bytes(payload),
             Value::Bytes(signature),
         ]);
@@ -278,11 +291,17 @@ impl DelegationToken {
         // Extract array elements
         let elements = match value {
             Value::Array(arr) => arr,
-            _ => return Err(Error::InvalidDelegation("Expected CBOR array for COSE Sign1".to_string())),
+            _ => {
+                return Err(Error::InvalidDelegation(
+                    "Expected CBOR array for COSE Sign1".to_string(),
+                ))
+            }
         };
 
         if elements.len() != 4 {
-            return Err(Error::InvalidDelegation("Invalid COSE Sign1 structure".to_string()));
+            return Err(Error::InvalidDelegation(
+                "Invalid COSE Sign1 structure".to_string(),
+            ));
         }
 
         // Extract payload and signature
@@ -503,7 +522,10 @@ mod tests {
         assert_eq!(token1.delegate, token2.delegate);
         assert_eq!(token1.issued_at, token2.issued_at);
         assert_eq!(token1.expires_at, token2.expires_at);
-        assert_eq!(token1.delegation_id.to_string(), token2.delegation_id.to_string());
+        assert_eq!(
+            token1.delegation_id.to_string(),
+            token2.delegation_id.to_string()
+        );
     }
 
     #[test]

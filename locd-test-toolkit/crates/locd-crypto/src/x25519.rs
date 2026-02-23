@@ -50,7 +50,10 @@ impl X25519KeyPair {
     ///
     /// Returns the shared secret (32 bytes)
     pub fn key_agreement(&self, their_public: &X25519PublicKey) -> Vec<u8> {
-        self.secret.diffie_hellman(&their_public.public).to_bytes().to_vec()
+        self.secret
+            .diffie_hellman(&their_public.public)
+            .to_bytes()
+            .to_vec()
     }
 }
 

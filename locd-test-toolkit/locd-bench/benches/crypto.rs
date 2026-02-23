@@ -1,13 +1,11 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
-use locd_crypto::{Ed25519KeyPair, X25519KeyPair, ChaCha20Poly1305};
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
+use locd_crypto::{ChaCha20Poly1305, Ed25519KeyPair, X25519KeyPair};
 
 /// Benchmark Ed25519 key generation
 /// Target: <1ms
 fn bench_ed25519_keygen(c: &mut Criterion) {
     c.bench_function("ed25519_keygen", |b| {
-        b.iter(|| {
-            black_box(Ed25519KeyPair::generate())
-        })
+        b.iter(|| black_box(Ed25519KeyPair::generate()))
     });
 }
 
@@ -15,12 +13,11 @@ fn bench_ed25519_keygen(c: &mut Criterion) {
 /// Target: <0.5ms
 fn bench_ed25519_sign(c: &mut Criterion) {
     let keypair = Ed25519KeyPair::generate();
-    let message = b"test message for benchmarking - this simulates a typical delegation token payload";
+    let message =
+        b"test message for benchmarking - this simulates a typical delegation token payload";
 
     c.bench_function("ed25519_sign", |b| {
-        b.iter(|| {
-            black_box(keypair.sign(message))
-        })
+        b.iter(|| black_box(keypair.sign(message)))
     });
 }
 
@@ -28,13 +25,12 @@ fn bench_ed25519_sign(c: &mut Criterion) {
 /// Target: <1ms
 fn bench_ed25519_verify(c: &mut Criterion) {
     let keypair = Ed25519KeyPair::generate();
-    let message = b"test message for benchmarking - this simulates a typical delegation token payload";
+    let message =
+        b"test message for benchmarking - this simulates a typical delegation token payload";
     let signature = keypair.sign(message);
 
     c.bench_function("ed25519_verify", |b| {
-        b.iter(|| {
-            black_box(keypair.verify(message, &signature).is_ok())
-        })
+        b.iter(|| black_box(keypair.verify(message, &signature).is_ok()))
     });
 }
 
@@ -46,9 +42,7 @@ fn bench_ed25519_sign_sizes(c: &mut Criterion) {
     for size in [32, 128, 512, 1024, 4096, 16384].iter() {
         let message = vec![0u8; *size];
         group.bench_with_input(BenchmarkId::from_parameter(size), size, |b, _| {
-            b.iter(|| {
-                black_box(keypair.sign(&message))
-            });
+            b.iter(|| black_box(keypair.sign(&message)));
         });
     }
     group.finish();
@@ -61,9 +55,7 @@ fn bench_x25519_key_agreement(c: &mut Criterion) {
     let bob_keypair = X25519KeyPair::generate();
 
     c.bench_function("x25519_key_agreement", |b| {
-        b.iter(|| {
-            black_box(alice_keypair.key_agreement(&bob_keypair.public_key()))
-        })
+        b.iter(|| black_box(alice_keypair.key_agreement(&bob_keypair.public_key())))
     });
 }
 
@@ -79,9 +71,7 @@ fn bench_chacha20poly1305_encrypt(c: &mut Criterion) {
 
         group.throughput(criterion::Throughput::Bytes(*size as u64));
         group.bench_with_input(BenchmarkId::from_parameter(size), size, |b, _| {
-            b.iter(|| {
-                black_box(ChaCha20Poly1305::encrypt(&key, &plaintext, &[]))
-            });
+            b.iter(|| black_box(ChaCha20Poly1305::encrypt(&key, &plaintext, &[])));
         });
     }
     group.finish();
@@ -99,9 +89,7 @@ fn bench_chacha20poly1305_decrypt(c: &mut Criterion) {
 
         group.throughput(criterion::Throughput::Bytes(*size as u64));
         group.bench_with_input(BenchmarkId::from_parameter(size), size, |b, _| {
-            b.iter(|| {
-                black_box(ChaCha20Poly1305::decrypt(&key, &ciphertext, &nonce, &[]))
-            });
+            b.iter(|| black_box(ChaCha20Poly1305::decrypt(&key, &ciphertext, &nonce, &[])));
         });
     }
     group.finish();
@@ -112,9 +100,7 @@ fn bench_key_serialization(c: &mut Criterion) {
     let keypair = Ed25519KeyPair::generate();
 
     c.bench_function("ed25519_public_key_to_bytes", |b| {
-        b.iter(|| {
-            black_box(keypair.public_key().to_bytes())
-        })
+        b.iter(|| black_box(keypair.public_key().to_bytes()))
     });
 }
 

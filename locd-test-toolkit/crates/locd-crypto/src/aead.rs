@@ -2,8 +2,7 @@
 
 use chacha20poly1305::{
     aead::{Aead, AeadCore, KeyInit, OsRng, Payload},
-    ChaCha20Poly1305 as ChaCha20Poly1305Cipher,
-    XChaCha20Poly1305 as XChaCha20Poly1305Cipher,
+    ChaCha20Poly1305 as ChaCha20Poly1305Cipher, XChaCha20Poly1305 as XChaCha20Poly1305Cipher,
 };
 use locd_core::{Error, Result};
 
@@ -63,7 +62,8 @@ impl ChaCha20Poly1305 {
         let cipher = ChaCha20Poly1305Cipher::new_from_slice(key)
             .map_err(|e| Error::crypto(format!("Invalid key: {}", e)))?;
 
-        let nonce_array = nonce.try_into()
+        let nonce_array = nonce
+            .try_into()
             .map_err(|_| Error::crypto("Invalid nonce length"))?;
 
         let payload = Payload {
@@ -135,7 +135,8 @@ impl XChaCha20Poly1305 {
         let cipher = XChaCha20Poly1305Cipher::new_from_slice(key)
             .map_err(|e| Error::crypto(format!("Invalid key: {}", e)))?;
 
-        let nonce_array = nonce.try_into()
+        let nonce_array = nonce
+            .try_into()
             .map_err(|_| Error::crypto("Invalid nonce length"))?;
 
         let payload = Payload {

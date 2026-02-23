@@ -2,8 +2,8 @@
 //!
 //! Perform identity verification using the Loc'd Protocol challenge-response flow.
 
-use clap::{Parser, Subcommand};
 use anyhow::{Context, Result};
+use clap::{Parser, Subcommand};
 use locd_core::types::IdentityDomain;
 use locd_crypto::Ed25519KeyPair;
 use locd_verification::{Claimant, Verifier};
@@ -106,16 +106,37 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Claimant { device, domain, output_hello } => {
+        Commands::Claimant {
+            device,
+            domain,
+            output_hello,
+        } => {
             create_hello(device, domain, output_hello)?;
         }
-        Commands::Respond { device, domain, challenge, delegation, output } => {
+        Commands::Respond {
+            device,
+            domain,
+            challenge,
+            delegation,
+            output,
+        } => {
             create_response(device, domain, challenge, delegation, output)?;
         }
-        Commands::Verifier { domain, hello, output_challenge } => {
+        Commands::Verifier {
+            domain,
+            hello,
+            output_challenge,
+        } => {
             create_challenge(domain, hello, output_challenge)?;
         }
-        Commands::Verify { domain, hello, challenge, response, service, action } => {
+        Commands::Verify {
+            domain,
+            hello,
+            challenge,
+            response,
+            service,
+            action,
+        } => {
             verify_response_cmd(domain, hello, challenge, response, service, action)?;
         }
     }
@@ -256,7 +277,7 @@ fn verify_response_cmd(
     let verifier = Verifier::new(domain, wg_key, None);
 
     // Load messages (all CBOR binary)
-    use locd_verification::{HelloMessage, ChallengeMessage, ResponseMessage};
+    use locd_verification::{ChallengeMessage, HelloMessage, ResponseMessage};
 
     let hello_bytes = fs::read(&hello_path)
         .with_context(|| format!("Failed to read hello from {:?}", hello_path))?;

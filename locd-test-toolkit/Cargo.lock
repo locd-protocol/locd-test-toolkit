@@ -1442,6 +1442,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "locd-examples"
+version = "0.1.0"
+dependencies = [
+ "locd-core",
+ "locd-crypto",
+ "locd-delegation",
+ "locd-dns",
+ "locd-revocation",
+ "locd-test-vectors",
+ "locd-verification",
+]
+
+[[package]]
 name = "locd-keygen"
 version = "0.1.0"
 dependencies = [

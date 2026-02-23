@@ -47,7 +47,10 @@ pub fn parse_dns_revocation_record(txt_content: &str) -> Result<(HashSet<String>
 /// Fetch revocation data from HTTPS supplementary list
 ///
 /// URL from identity record's `rev` field
-pub async fn fetch_https_revocations(url: &str, master_public_key: &locd_crypto::Ed25519PublicKey) -> Result<Option<CachedRevocationData>> {
+pub async fn fetch_https_revocations(
+    url: &str,
+    master_public_key: &locd_crypto::Ed25519PublicKey,
+) -> Result<Option<CachedRevocationData>> {
     // Fetch from HTTPS
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(10))
@@ -70,12 +73,15 @@ pub async fn fetch_https_revocations(url: &str, master_public_key: &locd_crypto:
         .map_err(|e| Error::Custom(format!("Failed to read response body: {}", e)))?;
 
     // Parse JSON
-    let list: RevocationList = serde_json::from_str(&body)
-        .map_err(|e| Error::Custom(format!("Invalid JSON: {}", e)))?;
+    let list: RevocationList =
+        serde_json::from_str(&body).map_err(|e| Error::Custom(format!("Invalid JSON: {}", e)))?;
 
     // Verify version
     if list.v != "locd-revoke-list-v1" {
-        return Err(Error::Custom(format!("Unsupported revocation list version: {}", list.v)));
+        return Err(Error::Custom(format!(
+            "Unsupported revocation list version: {}",
+            list.v
+        )));
     }
 
     // Verify signature
@@ -99,7 +105,10 @@ pub async fn fetch_https_revocations(url: &str, master_public_key: &locd_crypto:
 }
 
 /// Helper to convert DNS record with TTL into cached data
-pub fn dns_record_to_cached_data(revoked_ids: HashSet<String>, ttl: Option<u32>) -> CachedRevocationData {
+pub fn dns_record_to_cached_data(
+    revoked_ids: HashSet<String>,
+    ttl: Option<u32>,
+) -> CachedRevocationData {
     let now = current_timestamp();
     let ttl_secs = ttl.unwrap_or(DEFAULT_DNS_TTL as u32) as u64;
     let expires_at = now + ttl_secs;
