@@ -1,0 +1,35 @@
+[workspace]
+
+[package]
+name = "locd-audit-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+locd-delegation = { path = "../../crates/locd-delegation" }
+locd-dns = { path = "../../crates/locd-dns" }
+locd-verification = { path = "../../crates/locd-verification" }
+ciborium = "0.2"
+
+[[bin]]
+name = "fuzz_delegation_token"
+path = "fuzz_targets/fuzz_delegation_token.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "fuzz_dns_record"
+path = "fuzz_targets/fuzz_dns_record.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "fuzz_verification_messages"
+path = "fuzz_targets/fuzz_verification_messages.rs"
+test = false
+doc = false

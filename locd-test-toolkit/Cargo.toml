@@ -14,6 +14,10 @@ members = [
     "tools/locd-dns-tools",
     "tools/locd-compliance",
     "locd-bench",
+    "locd-audit",
+]
+exclude = [
+    "locd-audit/fuzz",
 ]
 
 [workspace.package]
