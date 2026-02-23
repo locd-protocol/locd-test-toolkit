@@ -53,30 +53,39 @@ locd-audit full --samples 1000
 
 ## Fuzzing
 
-Fuzzing requires `cargo-fuzz`:
+Fuzzing requires `cargo-fuzz` and **nightly Rust** (for sanitizer support):
 
 ```bash
+# Install nightly toolchain
+rustup install nightly
+
+# Install cargo-fuzz
 cargo install cargo-fuzz
+
+# Switch to locd-audit directory
 cd locd-audit
 ```
 
 ### Fuzz Delegation Tokens
 
 ```bash
-cargo fuzz run fuzz_delegation_token -- -max_total_time=3600
+cargo +nightly fuzz run fuzz_delegation_token -- -max_total_time=3600
 ```
 
 ### Fuzz DNS Records
 
 ```bash
-cargo fuzz run fuzz_dns_record -- -max_total_time=3600
+cargo +nightly fuzz run fuzz_dns_record -- -max_total_time=3600
 ```
 
 ### Fuzz Verification Messages
 
 ```bash
-cargo fuzz run fuzz_verification_messages -- -max_total_time=3600
+cargo +nightly fuzz run fuzz_verification_messages -- -max_total_time=3600
 ```
+
+**Note:** Fuzzing uses LLVM's AddressSanitizer which requires nightly Rust.
+Use `cargo +nightly` to run fuzz targets.
 
 ## Interpreting Results
 
