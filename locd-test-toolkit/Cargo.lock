@@ -1141,9 +1141,11 @@ dependencies = [
  "locd-crypto",
  "locd-delegation",
  "locd-dns",
+ "locd-revocation",
  "locd-verification",
  "rand",
  "tokio",
+ "uuid",
 ]
 
 [[package]]
