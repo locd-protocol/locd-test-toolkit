@@ -1,390 +1,519 @@
 # Loc'd Protocol Test Toolkit - Comprehensive Handover
 
-## Project Overview
+**Last Updated**: 2026-02-24
+**Project Location**: `/home/lane/projects/locd/locd-test-toolkit/`
+**Git Repository**: `/home/lane/projects/locd/.git`
+**Current Status**: ✅ Phase 1 Complete (130 tests passing)
 
-**Goal**: Build protocol tools and test suite for the Loc'd Protocol - a hardware-bound, user-sovereign digital identity system.
+---
 
-**Location**: `/home/lane/projects/locd/locd-test-toolkit/`
+## 🎯 Project Overview
 
-**Technology**: Rust workspace with 7 library crates + 5 CLI tools
+Building a comprehensive test toolkit for the **Loc'd Protocol** - a hardware-bound, user-sovereign digital identity system. The toolkit consists of Rust library crates, CLI tools, test vectors, and compliance testing infrastructure.
 
-## Current Status: Phase 1 (5/7 Complete) ✅
+**Specification**: `/home/lane/projects/locd/SPEC.md` (32KB protocol spec)
 
-> **NOTE**: This handover is from 2026-01-29. For the latest status (2025-02-23), see **HANDOVER-2025-02-23.md**
+---
+
+## 📊 Current Status: Phase 1 COMPLETE ✅
+
+### Test Status - ALL PASSING
 
 ```
-COMPLETED (as of 2025-02-23):
-✅ locd-core:         14 tests passing
-✅ locd-crypto:       34 tests passing
-✅ locd-delegation:   16 tests passing
-✅ locd-dns:          11 tests passing
-✅ locd-verification: 23 tests passing  ← COMPLETED 2025-02-23
-────────────────────────────────────────
-Total:                98/98 tests passing
-
-REMAINING:
-⏳ locd-revocation     (Revocation checking)
-⏳ locd-test-vectors   (Golden test data)
+✅ locd-core:         14 tests  (core types, errors, constants)
+✅ locd-crypto:       34 tests  (RFC-compliant crypto)
+✅ locd-delegation:   16 tests  (CBOR delegation tokens)
+✅ locd-dns:          11 tests  (DNS TXT record formats)
+✅ locd-verification: 22 tests  (challenge-response protocol)
+✅ locd-revocation:   21 tests  (revocation checking) ← NEW
+✅ locd-test-vectors: 12 tests  (golden test data) ← NEW
+──────────────────────────────────────────────────
+Total:               130/130 tests passing
 ```
 
-## Project Structure
+**Verify tests**:
+```bash
+cd /home/lane/projects/locd/locd-test-toolkit
+source ~/.cargo/env
+cargo test --workspace --lib
+# Expected: 130 tests passing
+```
+
+### Phase Progress (6 phases total)
+
+**Completed: 1.5 phases (25% overall)**
+- ✅ **Phase 1**: Core Libraries (7 crates, 130 tests) - COMPLETE
+- ✅ **Phase 3**: Test Vectors (completed early in Phase 1)
+
+**Next Up**:
+- ⏳ **Phase 2**: CLI Tools (5 tools) ← **START HERE**
+- ⏳ **Phase 4**: Compliance Suite
+- ⏳ **Phase 5**: Mock DNS Server
+- ⏳ **Phase 6**: Documentation & CI/CD
+
+---
+
+## 🚀 Phase 2: CLI Tools (Next Priority)
+
+**Goal**: Build 5 command-line tools using the Phase 1 library crates.
+
+### 1. locd-keygen - Key Generation & Management
+
+**Location**: `tools/locd-keygen/`
+
+**Features**:
+- Generate Master/Device/Session keys
+- Import/export keys (JSON format)
+- Display key information
+- Key rotation helpers
+
+**Commands**:
+```bash
+locd-keygen generate --type master --output master.key
+locd-keygen generate --type device --output device.key
+locd-keygen info master.key
+locd-keygen export --format json master.key
+locd-keygen import --format json master.json
+```
+
+**Dependencies**: locd-core, locd-crypto, clap, anyhow
+**Spec reference**: §4 (Key Hierarchy)
+
+---
+
+### 2. locd-delegate - Delegation Token Creation
+
+**Location**: `tools/locd-delegate/`
+
+**Features**:
+- Create delegation tokens
+- Sign with Master Key
+- Set constraints (services, actions, expiry)
+- Validate and display tokens
+
+**Commands**:
+```bash
+locd-delegate create \
+  --master master.key \
+  --device device.pub \
+  --service "api.example.com" \
+  --action "read" \
+  --expires-in 86400 \
+  --output token.cbor
+
+locd-delegate verify token.cbor --master master.pub
+locd-delegate info token.cbor
+```
+
+**Dependencies**: locd-core, locd-crypto, locd-delegation, clap, anyhow
+**Spec reference**: §6 (Delegation Layer)
+
+---
+
+### 3. locd-verify - Challenge-Response Verification
+
+**Location**: `tools/locd-verify/`
+
+**Features**:
+- Act as Claimant (prove identity)
+- Act as Verifier (verify identity)
+- Complete verification flows
+- Revocation checking integration
+
+**Commands**:
+```bash
+# Claimant mode
+locd-verify claimant \
+  --device device.key \
+  --domain alice.example.com \
+  --delegation token.cbor
+
+# Verifier mode
+locd-verify verifier \
+  --domain service.example.com \
+  --wg-key wg.pub
+```
+
+**Dependencies**: locd-core, locd-crypto, locd-verification, locd-revocation, clap, tokio
+**Spec reference**: §7 (Verification Layer)
+
+---
+
+### 4. locd-dns-tools - DNS Record Management
+
+**Location**: `tools/locd-dns-tools/`
+
+**Features**:
+- Generate DNS TXT records
+- Format for DNS servers
+- Validate DNS records
+
+**Commands**:
+```bash
+locd-dns-tools identity \
+  --domain example.com \
+  --master master.pub \
+  --output identity.txt
+
+locd-dns-tools revocation \
+  --domain example.com \
+  --revoke uuid1,uuid2 \
+  --output revocation.txt
+```
+
+**Dependencies**: locd-core, locd-crypto, locd-dns, locd-revocation, clap
+**Spec reference**: §5 (Identity Layer), §8 (Revocation Layer)
+
+---
+
+### 5. locd-compliance - Compliance Checking
+
+**Location**: `tools/locd-compliance/`
+
+**Features**:
+- Run protocol compliance tests
+- Validate implementations
+- Generate test reports
+- Verify test vectors
+
+**Commands**:
+```bash
+locd-compliance run --suite all
+locd-compliance verify --vectors test-vectors/locd-v0.1.0.json
+locd-compliance report --format html --output report.html
+```
+
+**Dependencies**: All locd-* crates, clap
+**Spec reference**: All sections
+
+---
+
+## 📁 Project Structure
 
 ```
 locd-test-toolkit/
-├── Cargo.toml                    # Workspace manifest
-├── crates/
-│   ├── locd-core/               ✅ Core types, errors, constants
-│   │   ├── src/
-│   │   │   ├── lib.rs
-│   │   │   ├── constants.rs
-│   │   │   ├── error.rs
-│   │   │   ├── keys.rs
-│   │   │   └── types.rs
-│   ├── locd-crypto/             ✅ Crypto primitives
-│   │   ├── src/
-│   │   │   ├── lib.rs
-│   │   │   ├── ed25519.rs       # Ed25519 signatures
-│   │   │   ├── x25519.rs        # X25519 key agreement
-│   │   │   ├── aead.rs          # ChaCha20-Poly1305
-│   │   │   ├── kdf.rs           # HKDF-SHA256
-│   │   │   ├── password.rs      # Argon2id
-│   │   │   └── encoding.rs      # Base64url/hex
-│   ├── locd-delegation/         ✅ Delegation tokens
-│   │   ├── src/
-│   │   │   ├── lib.rs
-│   │   │   ├── token.rs         # CBOR/COSE tokens
-│   │   │   └── validator.rs     # Constraint checking
-│   ├── locd-dns/                ✅ DNS records
-│   │   ├── src/
-│   │   │   ├── lib.rs
-│   │   │   ├── records.rs       # Identity/Revocation/Rotation records
-│   │   │   └── resolver.rs      # DNS resolver (placeholder)
-│   ├── locd-verification/       ⏳ TODO
-│   ├── locd-revocation/         ⏳ TODO
-│   └── locd-test-vectors/       ⏳ TODO
-├── tools/
-│   ├── locd-keygen/             ⏳ TODO (Phase 2)
-│   ├── locd-delegate/           ⏳ TODO (Phase 2)
-│   ├── locd-verify/             ⏳ TODO (Phase 2)
-│   ├── locd-dns-tools/          ⏳ TODO (Phase 2)
-│   └── locd-compliance/         ⏳ TODO (Phase 4)
-├── test-vectors/                ⏳ TODO (Phase 3)
-└── compliance-suite/            ⏳ TODO (Phase 4)
+├── Cargo.toml                      # Workspace manifest
+├── HANDOVER.md                     # This file
+├── HANDOVER-2026-02-23.md          # Phase 1 completion details
+│
+├── crates/                         # ✅ Phase 1 - ALL COMPLETE
+│   ├── locd-core/                  # 14 tests ✅
+│   ├── locd-crypto/                # 34 tests ✅
+│   ├── locd-delegation/            # 16 tests ✅
+│   ├── locd-dns/                   # 11 tests ✅
+│   ├── locd-verification/          # 22 tests ✅
+│   ├── locd-revocation/            # 21 tests ✅
+│   └── locd-test-vectors/          # 12 tests ✅
+│
+├── tools/                          # ⏳ Phase 2 - START HERE
+│   ├── locd-keygen/                # (placeholder)
+│   ├── locd-delegate/              # (placeholder)
+│   ├── locd-verify/                # (placeholder)
+│   ├── locd-dns-tools/             # (placeholder)
+│   └── locd-compliance/            # (placeholder)
+│
+├── examples/
+│   └── generate_vectors.rs        # Test vector generation
+│
+└── target/                         # Build artifacts
 ```
 
-## Quick Start Commands
+---
 
-```bash
-# Navigate to project
-cd /home/lane/projects/locd/locd-test-toolkit
+## 🔑 Key Implementation Patterns
 
-# Build all completed crates
-source ~/.cargo/env
-cargo build -p locd-core -p locd-crypto -p locd-delegation -p locd-dns
+### CLI Tool Template
 
-# Run all tests
-cargo test --workspace --lib
-
-# Run tests for specific crate
-cargo test -p locd-core
-cargo test -p locd-crypto
-cargo test -p locd-delegation
-cargo test -p locd-dns
-
-# Check for warnings
-cargo clippy --workspace
-```
-
-## Completed Components
-
-### 1. locd-core (Foundation)
-
-**Purpose**: Core types, errors, and constants used across all crates.
-
-**Key exports**:
-- `Error`, `Result` - Comprehensive error handling
-- `MasterKey`, `DeviceKey`, `SessionKey` - Three-tier key hierarchy
-- `DelegationId`, `IdentityDomain`, `ServicePattern`, `ActionPattern` - Protocol types
-- Constants: `PROTOCOL_VERSION`, `DELEGATION_TYPE`, `MAX_DELEGATION_DURATION_SECS`, etc.
-
-**Notable features**:
-- Pattern matching for service/action wildcards (`*.example.com`, `*`)
-- DNS record name generation from IdentityDomain
-- Expiry checking for keys
-
-### 2. locd-crypto (Cryptography)
-
-**Purpose**: RFC-compliant cryptographic operations.
-
-**Implementations**:
-- **Ed25519**: Sign/verify with RFC 8032 compliance
-- **X25519**: Key agreement for Diffie-Hellman
-- **ChaCha20-Poly1305**: AEAD encryption with AAD support
-- **XChaCha20-Poly1305**: Extended nonce AEAD (for recovery)
-- **HKDF-SHA256**: Key derivation
-- **Argon2id**: Password hashing
-- **Encoding**: Base64url (no padding) and hex
-
-**Key exports**:
-- `Ed25519KeyPair`, `Ed25519PublicKey`, `Ed25519Signature`
-- `X25519KeyPair`, `X25519PublicKey`
-- `ChaCha20Poly1305`, `XChaCha20Poly1305`
-- `hkdf_sha256`, `derive_encryption_key`, `derive_mac_key`
-- `hash_password`, `verify_password`
-- `base64url_encode`, `base64url_decode`
-
-### 3. locd-delegation (Tokens)
-
-**Purpose**: Delegation token creation, signing, validation.
-
-**Key features**:
-- CBOR encoding with integer keys (spec §6.2)
-- COSE-like signature structure (simplified)
-- Builder pattern for token creation
-- Constraint validation (services, actions, expiry, max_uses)
-- Timestamp tolerance checking
-
-**Key exports**:
-- `DelegationToken`, `DelegationTokenBuilder`
-- `DelegationValidator`, `ValidationContext`
-
-**Example usage**:
 ```rust
+// tools/locd-{name}/src/main.rs
+use clap::{Parser, Subcommand};
+use anyhow::Result;
+
+#[derive(Parser)]
+#[command(name = "locd-{name}")]
+#[command(about = "Description")]
+struct Cli {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    Generate {
+        #[arg(short, long)]
+        output: String,
+    },
+}
+
+fn main() -> Result<()> {
+    let cli = Cli::parse();
+    match cli.command {
+        Commands::Generate { output } => {
+            // Implementation
+        }
+    }
+    Ok(())
+}
+```
+
+### Using Library Crates
+
+**Ed25519 Keys**:
+```rust
+use locd_crypto::Ed25519KeyPair;
+
+let keypair = Ed25519KeyPair::generate();
+let keypair = Ed25519KeyPair::from_secret_bytes(&seed)?;
+let signature = keypair.sign(message);
+let pubkey = keypair.public_key();
+```
+
+**Delegation Tokens**:
+```rust
+use locd_delegation::DelegationToken;
+
 let token = DelegationToken::builder()
     .delegator(master_key.public_key().to_bytes())
     .delegate(device_key.public_key().to_bytes())
-    .expires_in(86400)  // 24 hours
+    .delegation_id(DelegationId::new())
+    .issued_at(now)
+    .expires_in(86400)
     .service("api.example.com")
     .action("read")
     .build()?;
 
 let signed = token.sign(&master_key)?;
-let verified = DelegationToken::verify(&signed, &master_key.public_key())?;
 ```
 
-### 4. locd-dns (DNS Records)
+**Verification**:
+```rust
+use locd_verification::{Claimant, Verifier};
 
-**Purpose**: DNS TXT record formatting/parsing for Loc'd protocol.
+let claimant = Claimant::new(device_key, domain);
+let hello = claimant.create_hello()?;
+let response = claimant.create_response(&challenge, token, vec![])?;
 
-**Record types**:
-- **IdentityRecord**: `_locd.<domain>` - Master Key publication
-- **RevocationRecord**: `_locd-revoke.<domain>` - Revoked delegation IDs
-- **RotationRecord**: `_locd-rotate.<domain>` - Key rotation proofs
-
-**Format examples**:
+let verifier = Verifier::new(domain, wg_key, revocation_checker);
+let challenge = verifier.handle_hello(&hello)?;
+let result = verifier.verify_response(&hello, &challenge, &response, service, action)?;
 ```
-_locd.example.com. 300 IN TXT "v=locd1; k=ed25519; p=<base64url>; t=1234567890"
-_locd-revoke.example.com. 60 IN TXT "v=locd-revoke1; ids=uuid1,uuid2; t=1234567890"
-_locd-rotate.example.com. 300 IN TXT "v=locd-rotate1; old=<key>; new=<key>; sig=<sig>"
-```
-
-**Key exports**:
-- `IdentityRecord`, `RevocationRecord`, `RotationRecord`
-- `DnsResolver`, `QueryOptions` (placeholder for DNSSEC)
-
-## Architecture Decisions
-
-### CBOR Map Representation
-- `ciborium::Value::Map` is `Vec<(Value, Value)>`, not `BTreeMap`
-- Use helper functions to iterate and find keys instead of `.get()`
-
-### COSE Signatures (Simplified)
-- Used simplified COSE-like structure: `[protected, unprotected, payload, signature]`
-- Full `coset` crate integration had serialization complexity
-- Current implementation is spec-compliant for the core use case
-
-### DNS Resolver (Placeholder)
-- Structure is in place for DNSSEC validation
-- Actual DNS querying with `trust-dns-resolver` is TODO
-- Allows testing of record formatting/parsing independently
-
-## Remaining Phase 1 Work
-
-### locd-verification (Next Priority)
-
-**Spec reference**: §7 - Verification Layer
-
-**What to implement**:
-1. **Protocol messages** (4 messages):
-   - `HelloMessage` - Claimant → Verifier
-   - `ChallengeMessage` - Verifier → Claimant
-   - `ResponseMessage` - Claimant → Verifier
-   - `ResultMessage` - Verifier → Claimant
-
-2. **Challenge-response flow**:
-   - Nonce generation (32 bytes random)
-   - Timestamp checking (60s tolerance)
-   - Signature verification
-   - Delegation validation integration
-
-3. **Verifier logic**:
-   - DNS lookup for Master Key
-   - DNSSEC validation
-   - Delegation signature check
-   - Service/action scope validation
-   - Revocation checking
-
-**Key files to create**:
-- `crates/locd-verification/src/lib.rs`
-- `crates/locd-verification/src/messages.rs`
-- `crates/locd-verification/src/verifier.rs`
-- `crates/locd-verification/src/claimant.rs`
-
-### locd-revocation (Final Phase 1)
-
-**Spec reference**: §8 - Revocation Layer
-
-**What to implement**:
-1. **RevocationChecker**:
-   - DNS TXT record lookup (`_locd-revoke.<domain>`)
-   - HTTPS supplementary list fetching
-   - Revocation cache with TTL
-
-2. **Revocation sources**:
-   - Primary: DNS TXT records
-   - Supplementary: HTTPS `.well-known/locd/revocations`
-   - Cache layer with TTL management
-
-**Key files to create**:
-- `crates/locd-revocation/src/lib.rs`
-- `crates/locd-revocation/src/checker.rs`
-- `crates/locd-revocation/src/cache.rs`
-
-## Dependencies Reference
-
-All workspace dependencies are centralized in root `Cargo.toml`:
-
-```toml
-[workspace.dependencies]
-# Crypto
-ed25519-dalek = { version = "2", features = ["rand_core"] }
-x25519-dalek = { version = "2", features = ["static_secrets"] }
-chacha20poly1305 = "0.10"
-hkdf = "0.12"
-argon2 = "0.5"
-
-# Encoding
-ciborium = "0.2"
-coset = "0.3"
-base64ct = { version = "1", features = ["alloc"] }
-hex = "0.4"
-
-# DNS
-trust-dns-resolver = "0.23"
-reqwest = { version = "0.11", features = ["rustls-tls"] }
-
-# Utilities
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-uuid = { version = "1", features = ["v4", "serde"] }
-clap = { version = "4", features = ["derive"] }
-tokio = { version = "1", features = ["full"] }
-thiserror = "1"
-anyhow = "1"
-rand = "0.8"
-sha2 = "0.10"
-```
-
-## Testing Strategy
-
-All crates have comprehensive unit tests:
-- **locd-core**: Type behavior, pattern matching, expiry logic
-- **locd-crypto**: RFC test vectors, roundtrip encoding, invalid inputs
-- **locd-delegation**: Token creation, signing, validation, constraint checking
-- **locd-dns**: Record formatting, parsing roundtrips, field validation
-
-**Run specific test groups**:
-```bash
-# All crypto tests
-cargo test -p locd-crypto
-
-# Specific test
-cargo test -p locd-delegation test_sign_verify
-
-# With output
-cargo test -p locd-core -- --nocapture
-```
-
-## Reference Documentation
-
-- **Spec**: `/home/lane/projects/locd/SPEC.md` (32KB, comprehensive protocol spec)
-- **Plan**: This document outlines the full implementation plan
-- **Spec sections**:
-  - §4: Key Hierarchy
-  - §5: Identity Layer (DNS)
-  - §6: Delegation Layer (tokens)
-  - §7: Verification Layer (challenge-response) ← NEXT
-  - §8: Revocation Layer ← AFTER VERIFICATION
-
-## Common Issues & Solutions
-
-### Issue: CBOR map key lookups
-**Problem**: `ciborium::Value::Map` is a `Vec<(Value, Value)>`, not a map.
-**Solution**: Iterate through vec, match on `Value::Integer(key)`.
-
-### Issue: COSE serialization
-**Problem**: `coset::CoseSign1` doesn't implement `Serialize`.
-**Solution**: Use simplified array structure `[protected, unprotected, payload, signature]`.
-
-### Issue: Constant imports
-**Problem**: `PROTOCOL_VERSION` is in `locd_core` root, not `constants` module.
-**Solution**: `use locd_core::{PROTOCOL_VERSION, DELEGATION_TYPE, ...}` (not `constants::*`).
-
-### Issue: Async tests
-**Problem**: Tests that use async DNS need tokio runtime.
-**Solution**: Use `#[tokio::test]` instead of `#[test]`.
-
-## Next Session Quick Start
-
-```bash
-# 1. Navigate and verify
-cd /home/lane/projects/locd/locd-test-toolkit
-source ~/.cargo/env
-cargo test --workspace --lib
-
-# 2. Verify all 75 tests pass
-# Expected: 14 + 34 + 16 + 11 = 75 tests passing
-
-# 3. Start locd-verification
-cd crates
-cargo new --lib locd-verification
-
-# 4. Add to workspace (already done)
-# Cargo.toml members list already includes it
-
-# 5. Add dependencies to locd-verification/Cargo.toml
-# See "Dependencies Reference" section above
-```
-
-## Phase Roadmap
-
-- **Phase 1** (Current): Core Libraries
-  - ✅ locd-core, locd-crypto, locd-delegation, locd-dns (4/7)
-  - ⏳ locd-verification, locd-revocation, locd-test-vectors (3/7)
-
-- **Phase 2**: CLI Tools (5 tools)
-  - locd-keygen, locd-delegate, locd-verify, locd-dns-tools, locd-compliance
-
-- **Phase 3**: Test Vectors
-  - JSON test data for cross-implementation validation
-
-- **Phase 4**: Compliance Suite
-  - YAML test definitions
-  - Automated scoring
-  - HTML report generation
-
-- **Phase 5**: Mock DNS Server
-  - DNSSEC simulation
-  - Configuration files
-
-- **Phase 6**: Documentation & CI/CD
-  - README, API docs
-  - GitHub Actions
-  - Release automation
 
 ---
 
-**Status**: Ready to continue with `locd-verification` implementation.
-**Location**: `/home/lane/projects/locd/locd-test-toolkit/`
-**Tests**: 75/75 passing across 4 completed crates
-**Next**: Implement locd-verification (challenge-response protocol, spec §7)
+## 🐛 Common Issues & Solutions
+
+### Ed25519KeyPair API
+- ❌ `from_bytes()` → ✅ `from_secret_bytes()`
+- ❌ `to_bytes()` → ✅ `secret_bytes()`
+
+### DelegationTokenBuilder API
+- ❌ `.id()` → ✅ `.delegation_id()`
+- ❌ `.created_at()` → ✅ `.issued_at()`
+
+### File I/O
+```rust
+// Read
+let bytes = std::fs::read("file.bin")?;
+let text = std::fs::read_to_string("file.txt")?;
+
+// Write
+std::fs::write("file.bin", &bytes)?;
+std::fs::write("file.txt", text)?;
+```
+
+---
+
+## 📚 Quick Reference
+
+### Build & Test
+```bash
+cd /home/lane/projects/locd/locd-test-toolkit
+source ~/.cargo/env
+
+# Build all
+cargo build --workspace
+
+# Run all tests
+cargo test --workspace --lib
+
+# Build specific tool
+cargo build -p locd-keygen --release
+
+# Run tool
+./target/release/locd-keygen --help
+```
+
+### Git Commands
+```bash
+# Git repo in parent directory
+cd /home/lane/projects/locd
+
+git status
+git add locd-test-toolkit/
+git commit -m "Message
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
+```
+
+---
+
+## 🎯 Starting Phase 2: Recommended Approach
+
+### Step 1: Start with locd-keygen
+**Why**: Simplest tool, foundational for others
+
+```bash
+cd /home/lane/projects/locd/locd-test-toolkit/tools/locd-keygen
+mkdir -p src
+touch src/main.rs
+```
+
+**Create Cargo.toml**:
+```toml
+[package]
+name = "locd-keygen"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "locd-keygen"
+path = "src/main.rs"
+
+[dependencies]
+locd-core = { workspace = true }
+locd-crypto = { workspace = true }
+clap = { workspace = true }
+anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+```
+
+### Step 2: Implement Commands
+- [ ] `generate` - Generate new keys
+- [ ] `info` - Display key info
+- [ ] `export` - Export to JSON
+- [ ] `import` - Import from JSON
+
+### Step 3: Test & Document
+- [ ] Manual testing with `cargo run`
+- [ ] Basic unit tests
+- [ ] README.md with examples
+
+### Step 4: Commit
+```bash
+cd /home/lane/projects/locd
+git add locd-test-toolkit/tools/locd-keygen
+git commit -m "Implement locd-keygen: key generation and management
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
+```
+
+---
+
+## 📖 Specification Guide
+
+**Location**: `/home/lane/projects/locd/SPEC.md`
+
+**Key sections**:
+- §4: Key Hierarchy (for locd-keygen)
+- §5: Identity Layer/DNS (for locd-dns-tools)
+- §6: Delegation Layer (for locd-delegate)
+- §7: Verification Layer (for locd-verify)
+- §8: Revocation Layer (implemented in Phase 1)
+
+**Quick search**:
+```bash
+grep -n "§4" /home/lane/projects/locd/SPEC.md
+less /home/lane/projects/locd/SPEC.md  # Then /search_term
+```
+
+---
+
+## 📋 Phase 2 Success Criteria
+
+### Each tool must:
+- ✅ Build without warnings
+- ✅ Have comprehensive `--help` text
+- ✅ Handle errors gracefully
+- ✅ Support UNIX conventions (stdin/stdout, exit codes)
+- ✅ Include basic tests
+- ✅ Have README.md with examples
+
+### Overall goals:
+- ✅ All 5 tools functional
+- ✅ Tools work together (integration)
+- ✅ Examples/tutorials
+- ✅ Performance reasonable (<1s startup)
+
+---
+
+## 🚦 Next Session: Quick Start
+
+```bash
+# 1. Verify Phase 1 still passing
+cd /home/lane/projects/locd/locd-test-toolkit
+source ~/.cargo/env
+cargo test --workspace --lib
+# Should see: 130 tests passing
+
+# 2. Start locd-keygen
+cd tools/locd-keygen
+cat Cargo.toml  # Check if exists
+
+# 3. Read spec for key generation
+less /home/lane/projects/locd/SPEC.md  # Search for "§4"
+
+# 4. Implement generate command
+vim src/main.rs
+```
+
+---
+
+## 📞 Resources
+
+- **Spec**: `/home/lane/projects/locd/SPEC.md`
+- **Project**: `/home/lane/projects/locd/locd-test-toolkit/`
+- **Git**: `/home/lane/projects/locd/.git`
+- **Handovers**:
+  - This file (comprehensive overview)
+  - `HANDOVER-2026-02-23.md` (Phase 1 details)
+
+---
+
+## ✅ Pre-Session Checklist
+
+```bash
+# 1. Correct directory
+cd /home/lane/projects/locd/locd-test-toolkit
+pwd
+
+# 2. Cargo environment
+source ~/.cargo/env
+which cargo
+
+# 3. Tests passing
+cargo test --workspace --lib --quiet
+# Should see: 130 tests passing
+
+# 4. Git status
+cd /home/lane/projects/locd
+git status
+# Should show: nothing to commit
+```
+
+---
+
+## 🎯 Summary
+
+**Current**: Phase 1 complete (7 library crates, 130 tests) ✅
+**Next**: Phase 2 - Build 5 CLI tools
+**Start with**: `locd-keygen` (key generation)
+**Success**: All 5 tools working, users can manage keys, tokens, verification, DNS, and compliance
+
+**The foundation is solid. Now build the user-facing tools!** 🚀
+
+---
+
+*Last updated: 2026-02-24*
+*Phase 1 completed: 2026-02-23*
+*Commit: dd34eca*
